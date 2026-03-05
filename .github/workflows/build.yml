@@ -1,5 +1,4 @@
 name: Lint & Build
-run-name: "Web CI${{ github.event_name == 'pull_request' && format(' - PR #{0}', github.event.pull_request.number) || format(' - {0}', github.ref_name) }}"
 
 on:
   push: {}
@@ -42,3 +41,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: artifacts
           publish_dir: ./dist
+
+      - name: 🔗 Trigger parent repo
+        if: github.repository == 'lncrawl/lncrawl-web' && github.ref == 'refs/heads/main'
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.MAIN_REPO_TOKEN }}" \
+            https://api.github.com/repos/lncrawl/lightnovel-crawler/dispatches \
+            -d '{"event_type":"web-build-updated"}'
