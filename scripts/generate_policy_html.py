@@ -38,10 +38,11 @@ def convert_file(md_path: Path, html_path: Path):
 def main():
     """Main function."""
     root = Path(__file__).parent.parent
+    output_dir = root / 'public'
 
     # Convert PRIVACY_POLICY.md
     privacy_md = root / 'PRIVACY_POLICY.md'
-    privacy_html = root / 'lncrawl-web' / 'public' / 'PRIVACY_POLICY.html'
+    privacy_html = output_dir / 'PRIVACY_POLICY.html'
 
     if privacy_md.exists():
         convert_file(privacy_md, privacy_html)
@@ -50,7 +51,7 @@ def main():
 
     # Convert TERMS_OF_SERVICE.md
     terms_md = root / 'TERMS_OF_SERVICE.md'
-    terms_html = root / 'lncrawl-web' / 'public' / 'TERMS_OF_SERVICE.html'
+    terms_html = output_dir / 'TERMS_OF_SERVICE.html'
 
     if terms_md.exists():
         convert_file(terms_md, terms_html)
