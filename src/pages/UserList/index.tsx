@@ -1,10 +1,18 @@
 import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
 import { TeamOutlined } from '@ant-design/icons';
-import { Divider, Flex, Input, List, Pagination, Typography } from 'antd';
+import {
+  Divider,
+  Flex,
+  Input,
+  List,
+  Pagination,
+  Select,
+  Typography,
+} from 'antd';
+import { ReferrerCard } from '../UserDetails/ReferrerCard';
 import { useUserList } from './hooks';
 import { UserListItemCard } from './UserListItemCard';
-import { ReferrerCard } from '../UserDetails/ReferrerCard';
 
 export const UserListPage: React.FC<any> = () => {
   const {
@@ -16,6 +24,8 @@ export const UserListPage: React.FC<any> = () => {
     total,
     users,
     referrerId,
+    isVerified,
+    isActive,
     refresh,
     updateParams,
   } = useUserList();
@@ -44,14 +54,52 @@ export const UserListPage: React.FC<any> = () => {
 
       <Divider size="small" />
 
-      <Flex align="center">
+      <Flex align="center" wrap="wrap" gap="small">
         <Input.Search
           defaultValue={initialSearch}
           onSearch={(search) => updateParams({ search, page: 1 })}
           placeholder="Find users"
           allowClear
           size="large"
+          style={{ minWidth: 250, flex: 3 }}
         />
+
+        <Flex gap="small" style={{ minWidth: 250, flex: 1 }}>
+          <Select
+            allowClear
+            size="large"
+            placeholder="Verified"
+            value={isVerified}
+            onChange={(v) =>
+              updateParams({
+                verified: typeof v === 'boolean' ? v : null,
+                page: 1,
+              })
+            }
+            options={[
+              { value: true, label: 'Verified' },
+              { value: false, label: 'Unverified' },
+            ]}
+            style={{ flex: 1, minWidth: 150 }}
+          />
+          <Select
+            allowClear
+            size="large"
+            placeholder="Status"
+            value={isActive}
+            onChange={(v) =>
+              updateParams({
+                active: typeof v === 'boolean' ? v : null,
+                page: 1,
+              })
+            }
+            options={[
+              { value: true, label: 'Active' },
+              { value: false, label: 'Inactive' },
+            ]}
+            style={{ flex: 1, minWidth: 100 }}
+          />
+        </Flex>
       </Flex>
 
       <Divider size="small" />
