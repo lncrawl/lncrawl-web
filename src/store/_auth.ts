@@ -16,7 +16,6 @@ interface UserAuth {
   user: User;
   token: string;
   tokenExpiresAt: number;
-  emailVerified: boolean;
 }
 
 export interface AuthState {
@@ -37,9 +36,9 @@ export const AuthSlice = createSlice({
   initialState: buildInitialState(),
   reducers: {
     login(state, action: PayloadAction<LoginResponse>) {
-      const { user, token, is_verified: emailVerified } = action.payload;
+      const { user, token } = action.payload;
       const tokenExpiresAt = 1000 * parseJwt(token)!.exp;
-      state.auth = { user, token, emailVerified, tokenExpiresAt };
+      state.auth = { user, token, tokenExpiresAt };
       state.availableAuths[state.auth.user.id] = state.auth;
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       for (const [key, val] of Object.entries(state.availableAuths)) {
@@ -61,8 +60,8 @@ export const AuthSlice = createSlice({
     },
     setEmailVerified(state) {
       if (!state.auth) return;
-      state.auth.emailVerified = true;
-      state.availableAuths[state.auth.user.id].emailVerified = true;
+      state.auth.user.is_verified = true;
+      state.availableAuths[state.auth.user.id].user.is_verified = true;
     },
     setUser(state, action: PayloadAction<User>) {
       const user = action.payload;
@@ -109,7 +108,7 @@ const selectAuthorization = createSelector(
   (auth, loggedIn) => (auth && loggedIn ? `Bearer ${auth.token}` : undefined)
 );
 const selectEmailVerified = createSelector(selectAuth, (auth) =>
-  Boolean(auth?.emailVerified)
+  Boolean(auth?.user.is_verified)
 );
 const selectEmailAlertConfig = createSelector(
   selectUser,

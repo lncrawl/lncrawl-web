@@ -25,6 +25,7 @@ export interface User extends _Base {
   role: UserRole;
   tier: UserTier;
   is_active: boolean;
+  is_verified: boolean;
   referrer_id?: string;
 
   extra: {
@@ -41,7 +42,6 @@ export interface UserToken {
 export interface LoginResponse {
   user: User;
   token: string;
-  is_verified: boolean;
 }
 
 export interface Paginated<T> {

@@ -28,22 +28,7 @@ export const UserDetailSection: React.FC<{
   const { xs } = Grid.useBreakpoint();
   const currentUser = useSelector(Auth.select.user);
 
-  const [isVerified, setIsVerified] = useState<boolean>();
   const [referenceCount, setReferenceCount] = useState<number>(0);
-
-  useEffect(() => {
-    const fetchVerified = async () => {
-      try {
-        const { data } = await axios.get<boolean>(
-          `/api/user/${user.id}/verified`
-        );
-        setIsVerified(data);
-      } catch {
-        setIsVerified(undefined);
-      }
-    };
-    fetchVerified();
-  }, [user.id]);
 
   useEffect(() => {
     const fetchReferenceCount = async () => {
@@ -120,8 +105,8 @@ export const UserDetailSection: React.FC<{
           </Space>
         }
       >
-        <Tag color={isVerified ? 'success' : 'error'}>
-          {isVerified ? 'Yes' : 'No'}
+        <Tag color={user.is_verified ? 'success' : 'error'}>
+          {user.is_verified ? 'Yes' : 'No'}
         </Tag>
       </Descriptions.Item>
 
