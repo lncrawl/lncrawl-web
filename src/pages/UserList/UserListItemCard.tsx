@@ -4,7 +4,7 @@ import { UserStatusTag } from '@/components/Tags/UserStatusTag';
 import { UserTierTag } from '@/components/Tags/UserTierTag';
 import { type User } from '@/types';
 import { formatDate } from '@/utils/time';
-import { CalendarOutlined } from '@ant-design/icons';
+import { CalendarOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { Card, Col, Flex, Grid, Row, Space, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { UserStatusActions } from './UserStatusActions';
@@ -52,6 +52,9 @@ export const UserListItemCard: React.FC<{
                   <Link to={`/admin/user/${user.id}`}>{user.email}</Link>
                 </Typography.Text>
               </Flex>
+            )}
+            {user.is_verified && (
+              <SafetyCertificateOutlined style={{ color: 'green' }} />
             )}
           </Space>
         </Col>
