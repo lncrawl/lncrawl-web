@@ -34,6 +34,9 @@ jobs:
       - name: 🏗️ Run build
         run: yarn build
 
+      - name: 🏷️ Set version
+        run: echo ${{ github.sha }} > ./dist/version
+
       - name: 📤 Publish artifacts
         uses: peaceiris/actions-gh-pages@v4
         if: github.ref == 'refs/heads/main'
@@ -41,12 +44,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: artifacts
           publish_dir: ./dist
-
-      - name: 🔗 Trigger parent repo
-        if: github.repository == 'lncrawl/lncrawl-web' && github.ref == 'refs/heads/main'
-        run: |
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.MAIN_REPO_TOKEN }}" \
-            https://api.github.com/repos/lncrawl/lightnovel-crawler/dispatches \
-            -d '{"event_type":"web-build-updated"}'
