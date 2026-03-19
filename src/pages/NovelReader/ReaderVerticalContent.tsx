@@ -10,6 +10,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getVoices } from '../SettingsPage/ReaderSettings/VoiceSettings';
+import { DiscussionEmbed } from 'disqus-react';
+import { truncate } from 'lodash';
 
 function useSpeechSynthesis(
   contentEl: HTMLDivElement | null,
@@ -207,16 +209,29 @@ export const ReaderVerticalContent: React.FC<{
   };
 
   return (
-    <div
-      id="chapter-content"
-      ref={setContentEl}
-      dangerouslySetInnerHTML={{
-        __html: contentHTML,
-      }}
-      onPointerUp={handleClick}
-      className={cx(styles.content, {
-        [styles.speaking]: speaking,
-      })}
-    />
+    <>
+      <div
+        id="chapter-content"
+        ref={setContentEl}
+        dangerouslySetInnerHTML={{
+          __html: contentHTML,
+        }}
+        onPointerUp={handleClick}
+        className={cx(styles.content, {
+          [styles.speaking]: speaking,
+        })}
+      />
+      <div className={styles.comments}>
+        <DiscussionEmbed
+          shortname="lightnovel-crawler"
+          config={{
+            language: 'en',
+            url: window.location.href,
+            identifier: data.chapter.id,
+            title: truncate(data.chapter.title, { length: 200 }),
+          }}
+        />
+      </div>
+    </>
   );
 };

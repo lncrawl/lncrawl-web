@@ -3,13 +3,21 @@
   width: 100%;
   min-height: calc(100vh - 50px);
 
-  .content {
+  &.mobile {
+    padding: 15px;
+    margin-bottom: 50px;
+  }
+
+  .content,
+  .comments {
     flex: 1;
     width: 100%;
     margin: 5px auto;
     max-width: 85ch;
     min-height: 100%;
+  }
 
+  .content {
     &.speaking {
       user-select: none;
 
@@ -22,14 +30,6 @@
         outline-offset: 7px;
         outline: 1px solid rgba(241, 108, 111, 0.5);
       }
-    }
-  }
-
-  &.mobile {
-    padding: 15px;
-
-    .content {
-      margin-bottom: 50px;
     }
   }
 }

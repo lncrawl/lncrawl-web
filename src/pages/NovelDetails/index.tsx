@@ -9,6 +9,8 @@ import { useParams } from 'react-router-dom';
 import { ArtifactListCard } from '../../components/ArtifactList/ArtifactListCard';
 import { NovelDetailsCard } from './NovelDetailsCard';
 import { VolumeListCard } from './VolumeListCard';
+import { DiscussionEmbed } from 'disqus-react';
+import { truncate } from 'lodash';
 
 export const NovelDetailsPage: React.FC<any> = () => {
   const { id } = useParams<{ id: string }>();
@@ -85,6 +87,15 @@ export const NovelDetailsPage: React.FC<any> = () => {
         artifacts={artifacts}
         showMakeButton
         novelId={novel.id}
+      />
+      <DiscussionEmbed
+        shortname="lightnovel-crawler"
+        config={{
+          language: 'en',
+          url: window.location.href,
+          identifier: novel.id,
+          title: truncate(novel.title, { length: 200 }),
+        }}
       />
     </Space>
   );
