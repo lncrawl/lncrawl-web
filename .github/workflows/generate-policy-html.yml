@@ -27,16 +27,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🐍 Set Up Python 3.11
-        uses: actions/setup-python@v6
+      - name: 🐍 Install uv & Python 3.11
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: '3.11'
 
       - name: 📦 Install Dependencies
-        run: pip install markdown
+        run: uv pip install --system markdown
 
       - name: ⚙️ Generate HTML files
-        run: python3 ./scripts/generate_policy_html.py
+        run: python ./scripts/generate_policy_html.py
 
       - name: ✅ Commit and Push HTML files
         uses: stefanzweifel/git-auto-commit-action@v6
