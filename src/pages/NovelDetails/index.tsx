@@ -88,13 +88,14 @@ export const NovelDetailsPage: React.FC<any> = () => {
         showMakeButton
         novelId={novel.id}
       />
+      <div style={{ marginBottom: 25 }} />
       <DiscussionEmbed
         shortname="lightnovel-crawler"
         config={{
           language: 'en',
           url: window.location.href,
           identifier: novel.id,
-          title: truncate(novel.title, { length: 200 }),
+          title: truncate(`Novel: ${novel.title}`, { length: 200 }),
         }}
       />
     </Space>

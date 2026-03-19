@@ -5,6 +5,8 @@ import type { Library, User } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Space, message } from 'antd';
 import axios from 'axios';
+import { DiscussionEmbed } from 'disqus-react';
+import { truncate } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -106,6 +108,20 @@ export const LibraryDetailsPage: React.FC = () => {
       {isAdmin && owner && <UserDetailsCard user={owner} title="Owner" />}
 
       <LibraryNovelList library={library} isOwner={isOwner} />
+
+      <div style={{ marginBottom: 25 }} />
+
+      {library.is_public && (
+        <DiscussionEmbed
+          shortname="lightnovel-crawler"
+          config={{
+            language: 'en',
+            url: window.location.href,
+            identifier: library.id,
+            title: truncate(`Library: ${library.name}`, { length: 200 }),
+          }}
+        />
+      )}
     </Space>
   );
 };

@@ -1,5 +1,6 @@
 import { Auth } from '@/store/_auth';
 import {
+  FolderOpenOutlined,
   FolderOpenTwoTone,
   GlobalOutlined,
   UserOutlined,
@@ -37,40 +38,51 @@ export const LibraryListPage: React.FC = () => {
 
       <Divider size="small" />
 
-      {isAdmin ? (
-        <LibraryList type={'all'} refreshId={refresh} />
-      ) : (
-        <Tabs
-          activeKey={tab}
-          onChange={(key) => setSearchParams({ tab: key })}
-          size="large"
-          tabBarGutter={24}
-          items={[
-            {
-              key: 'my',
-              label: (
-                <Typography.Text style={{ color: '#3cf' }}>
-                  <Space>
-                    <UserOutlined /> My Libraries
-                  </Space>
-                </Typography.Text>
-              ),
-              children: <LibraryList type={'my'} refreshId={refresh} />,
-            },
-            {
-              key: 'public',
-              label: (
-                <Typography.Text style={{ color: '#0f0' }}>
-                  <Space>
-                    <GlobalOutlined /> Public Libraries
-                  </Space>
-                </Typography.Text>
-              ),
-              children: <LibraryList type={'public'} refreshId={refresh} />,
-            },
-          ]}
-        />
-      )}
+      <Tabs
+        activeKey={tab}
+        onChange={(key) => setSearchParams({ tab: key })}
+        size="large"
+        tabBarGutter={24}
+        items={[
+          {
+            key: 'my',
+            label: (
+              <Typography.Text style={{ color: '#3cf' }}>
+                <Space>
+                  <UserOutlined /> My Libraries
+                </Space>
+              </Typography.Text>
+            ),
+            children: <LibraryList type={'my'} refreshId={refresh} />,
+          },
+          {
+            key: 'public',
+            label: (
+              <Typography.Text style={{ color: '#0f0' }}>
+                <Space>
+                  <GlobalOutlined /> Public Libraries
+                </Space>
+              </Typography.Text>
+            ),
+            children: <LibraryList type={'public'} refreshId={refresh} />,
+          },
+          ...(isAdmin
+            ? [
+                {
+                  key: 'all',
+                  label: (
+                    <Typography.Text>
+                      <Space>
+                        <FolderOpenOutlined /> All Libraries
+                      </Space>
+                    </Typography.Text>
+                  ),
+                  children: <LibraryList type={'all'} refreshId={refresh} />,
+                },
+              ]
+            : []),
+        ]}
+      />
     </>
   );
 };

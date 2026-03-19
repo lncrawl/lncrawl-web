@@ -228,7 +228,9 @@ export const ReaderVerticalContent: React.FC<{
             language: 'en',
             url: window.location.href,
             identifier: data.chapter.id,
-            title: truncate(data.chapter.title, { length: 200 }),
+            title: truncate(`${data.novel.title} | ${data.chapter.title}`, {
+              length: 200,
+            }),
           }}
         />
       </div>
