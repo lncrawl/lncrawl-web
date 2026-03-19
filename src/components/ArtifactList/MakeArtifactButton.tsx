@@ -35,7 +35,7 @@ export const MakeArtifactButton: React.FC<{
           '/api/artifact/enabled-formats'
         );
         setOptions(result.data);
-      } catch (err) {
+      } catch {
         setOptions([OutputFormat.epub]);
       } finally {
         setLoading(false);
