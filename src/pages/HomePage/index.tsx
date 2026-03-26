@@ -10,6 +10,7 @@ import { RequestNovelCard } from './RequestNovelCard';
 export const HomePage: React.FC<any> = () => {
   const user = useSelector(Auth.select.user);
   const isAdmin = useSelector(Auth.select.isAdmin);
+  const isLocalUser = useSelector(Auth.select.isLocal);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = useMemo(
@@ -26,6 +27,9 @@ export const HomePage: React.FC<any> = () => {
       <Tabs
         activeKey={tab}
         onChange={(key) => setSearchParams({ tab: key })}
+        tabBarStyle={{
+          display: isLocalUser ? 'none' : undefined,
+        }}
         tabBarExtraContent={{
           left: (
             <DeploymentUnitOutlined

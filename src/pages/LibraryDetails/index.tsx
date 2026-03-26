@@ -18,6 +18,7 @@ export const LibraryDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const user = useSelector(Auth.select.user);
   const isAdmin = useSelector(Auth.select.isAdmin);
+  const isLocalUser = useSelector(Auth.select.isLocal);
   const [messageApi, contextHolder] = message.useMessage();
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,7 +51,7 @@ export const LibraryDetailsPage: React.FC = () => {
   }, [id, refresh]);
 
   useEffect(() => {
-    if (!isAdmin || !library?.user_id) {
+    if (isLocalUser || !isAdmin || !library?.user_id) {
       return;
     }
     const loadOwner = async () => {
@@ -62,7 +63,7 @@ export const LibraryDetailsPage: React.FC = () => {
       }
     };
     loadOwner();
-  }, [library?.user_id, isAdmin, messageApi]);
+  }, [library?.user_id, isAdmin, isLocalUser, messageApi]);
 
   const handleTogglePublic = async (checked: boolean) => {
     if (!id) return;

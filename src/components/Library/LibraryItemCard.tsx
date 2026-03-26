@@ -1,11 +1,14 @@
+import { Auth } from '@/store/_auth';
 import type { LibraryItem } from '@/types';
 import { BookOutlined } from '@ant-design/icons';
 import { Card, Flex, Tag, Typography } from 'antd';
+import { useSelector } from 'react-redux';
 
 export const LibraryItemCard: React.FC<{
   library: LibraryItem;
   onClick: () => void;
 }> = ({ library, onClick }) => {
+  const isLocalUser = useSelector(Auth.select.isLocal);
   return (
     <Card
       hoverable
@@ -27,7 +30,7 @@ export const LibraryItemCard: React.FC<{
           <Flex wrap gap={8} align="center" justify="space-between">
             <Typography.Text strong>{library.name}</Typography.Text>
 
-            {library.is_public ? (
+            {isLocalUser ? null : library.is_public ? (
               <Tag color="green">Public</Tag>
             ) : (
               <Tag color="blue">Private</Tag>

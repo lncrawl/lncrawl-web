@@ -4,15 +4,18 @@ import { Avatar, theme, type AvatarProps } from 'antd';
 import md5 from 'spark-md5';
 
 const getGravatarUrl = (email: string, size = 200) => {
-  const hash = md5.hash(email.trim().toLowerCase());
+  const hash = md5.hash(String(email).trim().toLowerCase());
   return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=${size}`;
 };
 
-export const UserAvatar: React.FC<
-  {
-    user?: User | null;
-  } & AvatarProps
-> = ({ user, ...avatarProps }) => {
+type UserAvatarProps = AvatarProps & {
+  user?: User | null;
+};
+
+export const UserAvatar: React.FC<UserAvatarProps> = ({
+  user,
+  ...avatarProps
+}) => {
   const { token } = theme.useToken();
   if (!user) {
     return null;

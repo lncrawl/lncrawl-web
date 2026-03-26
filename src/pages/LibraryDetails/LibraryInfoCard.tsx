@@ -33,6 +33,7 @@ export const LibraryInfoCard: React.FC<LibraryInfoCardProps> = ({
 }) => {
   const { lg } = Grid.useBreakpoint();
   const isAdmin = useSelector(Auth.select.isAdmin);
+  const isLocalUser = useSelector(Auth.select.isLocal);
 
   return (
     <Card
@@ -73,7 +74,7 @@ export const LibraryInfoCard: React.FC<LibraryInfoCardProps> = ({
           {library.name || 'Library'}
         </Typography.Title>
 
-        {library.extra?.owner_name && (
+        {!isLocalUser && library.extra?.owner_name && (
           <Typography.Text
             type="secondary"
             style={{ marginBottom: lg ? 8 : 0 }}
@@ -84,8 +85,7 @@ export const LibraryInfoCard: React.FC<LibraryInfoCardProps> = ({
             </Flex>
           </Typography.Text>
         )}
-
-        {library.description ? (
+        {library.description && (
           <>
             {!lg && <Divider size="small" />}
             {library.description.split('\n\n').map((line, index) => (
@@ -100,7 +100,7 @@ export const LibraryInfoCard: React.FC<LibraryInfoCardProps> = ({
               </Typography.Text>
             ))}
           </>
-        ) : null}
+        )}
       </Flex>
 
       {!lg && <Divider size="small" />}
@@ -113,7 +113,7 @@ export const LibraryInfoCard: React.FC<LibraryInfoCardProps> = ({
           style={{ width: 300 }}
           align={lg ? 'flex-end' : 'center'}
         >
-          {isOwner ? (
+          {isLocalUser ? null : isOwner ? (
             <Space>
               <Typography.Text>Public</Typography.Text>
               <Switch

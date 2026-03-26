@@ -1,9 +1,20 @@
+import { Auth } from '@/store/_auth';
 import type { Library } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { FolderAddOutlined } from '@ant-design/icons';
-import { Button, Form, Input, message, Modal, Switch } from 'antd';
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Space,
+  Switch,
+  Typography,
+} from 'antd';
 import axios from 'axios';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 type FormValues = {
   name: string;
@@ -16,6 +27,7 @@ export const CreateLibraryButton: React.FC<{
 }> = ({ onSuccess }) => {
   const [form] = Form.useForm<FormValues>();
   const [messageApi, contextHolder] = message.useMessage();
+  const isLocalUser = useSelector(Auth.select.isLocal);
 
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -78,13 +90,18 @@ export const CreateLibraryButton: React.FC<{
             <Input.TextArea rows={3} placeholder="Optional description" />
           </Form.Item>
 
-          <Form.Item
-            label="Make public"
-            name="is_public"
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
+          {!isLocalUser && (
+            <Form.Item
+              label="Visibility"
+              name="is_public"
+              valuePropName="checked"
+            >
+              <Space>
+                <Switch />
+                <Typography.Text>Visible to everyone</Typography.Text>
+              </Space>
+            </Form.Item>
+          )}
         </Form>
       </Modal>
     </>

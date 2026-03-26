@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 export const LibraryCard: React.FC<{ library: Library }> = ({ library }) => {
   const navigate = useNavigate();
   const user = useSelector(Auth.select.user);
+  const isLocalUser = useSelector(Auth.select.isLocal);
 
   const gradientBackground = useMemo(
     () => getGradientForId(library.id),
@@ -62,18 +63,22 @@ export const LibraryCard: React.FC<{ library: Library }> = ({ library }) => {
               {library.name}
             </Typography.Title>
           </Space>
-          <Tag color={library.is_public ? 'green' : 'blue'}>
-            {library.is_public ? 'Public' : 'Private'}
-          </Tag>
+          {!isLocalUser && (
+            <Tag color={library.is_public ? 'green' : 'blue'}>
+              {library.is_public ? 'Public' : 'Private'}
+            </Tag>
+          )}
         </Flex>
 
         {/* Description */}
-        <Typography.Paragraph
-          ellipsis={{ rows: 3 }}
-          style={{ fontSize: 13, flex: 1 }}
-        >
-          {library.description || 'No description available'}
-        </Typography.Paragraph>
+        {library.description && (
+          <Typography.Paragraph
+            ellipsis={{ rows: 3 }}
+            style={{ fontSize: 13, flex: 1 }}
+          >
+            {library.description}
+          </Typography.Paragraph>
+        )}
 
         {/* Footer */}
         <Flex
@@ -86,19 +91,23 @@ export const LibraryCard: React.FC<{ library: Library }> = ({ library }) => {
             borderTop: '1px solid rgba(255, 255, 255, 0.2)',
           }}
         >
-          <Space size="small">
-            <UserOutlined style={{ fontSize: 14 }} />
-            <Typography.Text style={{ fontSize: 14 }}>
-              {library.extra.owner_name || 'Unknown'}
-              {library.user_id === user?.id ? ' (you)' : ''}
-            </Typography.Text>
-          </Space>
-          <Divider orientation="vertical" />
+          {!isLocalUser && (
+            <>
+              <Space size="small">
+                <UserOutlined style={{ fontSize: 14 }} />
+                <Typography.Text style={{ fontSize: 14 }}>
+                  {library.extra.owner_name || 'Unknown'}
+                  {library.user_id === user?.id ? ' (you)' : ''}
+                </Typography.Text>
+              </Space>
+              <Divider orientation="vertical" />
+            </>
+          )}
           <Space size="small">
             <BookOutlined style={{ fontSize: 14 }} />
             <Typography.Text strong style={{ fontSize: 14 }}>
               {library.extra.novel_count || 0}{' '}
-              {library.extra.novel_count === 1 ? 'Novel' : 'Novels'}
+              {library.extra.novel_count === 1 ? 'novel' : 'novels'}
             </Typography.Text>
           </Space>
         </Flex>

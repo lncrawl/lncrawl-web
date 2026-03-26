@@ -22,6 +22,8 @@ import { NovelDetailsCard } from '../NovelDetails/NovelDetailsCard';
 import { VolumeDetailsCard } from '../NovelDetails/VolumeDetailsCard';
 import { JobDetailsCard } from './JobDetailsCard';
 import { UserDetailsCard } from './UserDetailsCard';
+import { useSelector } from 'react-redux';
+import { Auth } from '@/store/_auth';
 
 const _cache = new LRUCache<string, any>({
   max: 1000,
@@ -53,6 +55,7 @@ async function handleFetch<T>(
 export const JobDetailsPage: React.FC<any> = () => {
   const { lg } = Grid.useBreakpoint();
   const { id } = useParams<{ id: string }>();
+  const isLocalUser = useSelector(Auth.select.isLocal);
 
   const [refreshId, setRefreshId] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -83,8 +86,9 @@ export const JobDetailsPage: React.FC<any> = () => {
   }, [id, refreshId]);
 
   useEffect(() => {
+    if (isLocalUser) return;
     handleFetch('user', job?.user_id, setUser, job?.is_done);
-  }, [job?.user_id, job?.is_done]);
+  }, [job?.user_id, job?.is_done, isLocalUser]);
 
   useEffect(() => {
     handleFetch('novel', job?.extra.novel_id, setNovel, job?.is_done);

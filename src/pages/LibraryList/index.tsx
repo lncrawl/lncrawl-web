@@ -16,12 +16,13 @@ export const LibraryListPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isAdmin = useSelector(Auth.select.isAdmin);
+  const isLocalUser = useSelector(Auth.select.isLocal);
 
   const [refresh, setRefresh] = useState(0);
 
   const tab = useMemo(() => {
-    return searchParams.get('tab') || 'my';
-  }, [searchParams]);
+    return searchParams.get('tab') || (isAdmin ? 'all' : 'my');
+  }, [searchParams, isAdmin]);
 
   useEffect(() => {
     navigate('/libraries');
@@ -43,6 +44,9 @@ export const LibraryListPage: React.FC = () => {
         onChange={(key) => setSearchParams({ tab: key })}
         size="large"
         tabBarGutter={24}
+        tabBarStyle={{
+          display: isLocalUser ? 'none' : undefined,
+        }}
         items={[
           {
             key: 'my',

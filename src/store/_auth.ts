@@ -15,16 +15,19 @@ import type { RootState } from '.';
 interface UserAuth {
   user: User;
   token: string;
+  scopes: string[];
   tokenExpiresAt: number;
 }
 
 export interface AuthState {
   auth: UserAuth | null;
+  viewAs: UserRole | null;
   availableAuths: Record<string, UserAuth>;
 }
 
 const buildInitialState = (): AuthState => ({
   auth: null,
+  viewAs: null,
   availableAuths: {},
 });
 
@@ -37,8 +40,10 @@ export const AuthSlice = createSlice({
   reducers: {
     login(state, action: PayloadAction<LoginResponse>) {
       const { user, token } = action.payload;
-      const tokenExpiresAt = 1000 * parseJwt(token)!.exp;
-      state.auth = { user, token, tokenExpiresAt };
+      const parsedToken = parseJwt(token);
+      const scopes = parsedToken?.scopes || [];
+      const tokenExpiresAt = 1000 * parsedToken!.exp;
+      state.auth = { user, token, scopes, tokenExpiresAt };
       state.availableAuths[state.auth.user.id] = state.auth;
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       for (const [key, val] of Object.entries(state.availableAuths)) {
@@ -72,6 +77,9 @@ export const AuthSlice = createSlice({
         state.availableAuths[user.id].user = user;
       }
     },
+    setViewAs(state, action: PayloadAction<UserRole | null | undefined>) {
+      state.viewAs = action.payload || null;
+    },
     setEmailAlerts(
       state,
       action: PayloadAction<Record<NotificationItem, boolean>>
@@ -99,9 +107,17 @@ const selectLoggedIn = createSelector(
 const selectUser = createSelector(selectAuth, (auth) => auth?.user);
 const selectIsAdmin = createSelector(
   selectUser,
-  (user) => user?.role === UserRole.ADMIN
+  selectAuthState,
+  (user, state) =>
+    user?.role === UserRole.ADMIN && state.viewAs !== UserRole.USER
 );
 const selectToken = createSelector(selectAuth, (auth) => auth?.token);
+const selectIsLocalUser = createSelector(
+  selectAuthState,
+  (state) =>
+    state.viewAs === UserRole.LOCAL ||
+    state.auth?.scopes.includes(UserRole.LOCAL)
+);
 const selectAuthorization = createSelector(
   selectAuth,
   selectLoggedIn,
@@ -129,8 +145,9 @@ export const Auth = {
   select: {
     loggedIn: selectLoggedIn,
     user: selectUser,
-    isAdmin: selectIsAdmin,
     authToken: selectToken,
+    isAdmin: selectIsAdmin,
+    isLocal: selectIsLocalUser,
     isVerified: selectEmailVerified,
     authorization: selectAuthorization,
     emailAlerts: selectEmailAlertConfig,

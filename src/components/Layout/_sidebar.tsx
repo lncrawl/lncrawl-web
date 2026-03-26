@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { DonateButton } from '../DonateButton';
 import { UserInfoCard } from '../UserInfoCard';
+import { LocalUserInfoCard } from './_header';
 
 function getClassName(currentPath: string, path: string): string | undefined {
   if (currentPath === path) {
@@ -33,6 +34,7 @@ export const MainLayoutSidebar: React.FC<{
   const { token } = theme.useToken();
   const { pathname: currentPath } = useLocation();
   const isAdmin = useSelector(Auth.select.isAdmin);
+  const isLocalUser = useSelector(Auth.select.isLocal);
 
   return (
     <Layout.Sider
@@ -65,15 +67,15 @@ export const MainLayoutSidebar: React.FC<{
           }}
           items={[
             {
-              type: 'group',
+              type: 'group' as const,
               key: 'user',
-              label: <UserInfoCard />,
+              label: isLocalUser ? <LocalUserInfoCard /> : <UserInfoCard />,
               style: {
                 background: 'none',
                 height: 'fit-content',
               },
             },
-            { type: 'divider' },
+            { type: 'divider' as const },
             {
               key: '/',
               icon: <DeploymentUnitOutlined />,
@@ -98,33 +100,42 @@ export const MainLayoutSidebar: React.FC<{
               className: getClassName(currentPath, '/meta/sources'),
               label: <Link to="/meta/sources">Crawlers</Link>,
             },
-            {
-              key: '/feedbacks',
-              icon: <CommentOutlined />,
-              className: getClassName(currentPath, '/feedbacks'),
-              label: <Link to="/feedbacks">Feedbacks</Link>,
-            },
-            { type: 'divider' },
-            {
-              key: '/profile',
-              icon: <UserOutlined />,
-              className: getClassName(currentPath, '/profile'),
-              label: <Link to="/profile">Profile</Link>,
-            },
+            ...(isLocalUser
+              ? []
+              : [
+                  {
+                    key: '/feedbacks',
+                    icon: <CommentOutlined />,
+                    className: getClassName(currentPath, '/feedbacks'),
+                    label: <Link to="/feedbacks">Feedbacks</Link>,
+                  },
+                ]),
+            { type: 'divider' as const },
+
+            ...(isLocalUser
+              ? []
+              : [
+                  {
+                    key: '/profile',
+                    icon: <UserOutlined />,
+                    className: getClassName(currentPath, '/profile'),
+                    label: <Link to="/profile">Profile</Link>,
+                  },
+                ]),
             {
               key: '/settings',
               icon: <SettingOutlined />,
               className: getClassName(currentPath, '/settings'),
               label: <Link to="/settings">Settings</Link>,
             },
-            { type: 'divider' },
+            { type: 'divider' as const },
             {
               key: '/tutorial',
               icon: <QuestionCircleOutlined />,
               className: getClassName(currentPath, '/tutorial'),
               label: <Link to="/tutorial">Tutorial</Link>,
             },
-            ...(isAdmin
+            ...(isAdmin && !isLocalUser
               ? [
                   { type: 'divider' as const },
                   {

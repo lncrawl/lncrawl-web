@@ -1,3 +1,4 @@
+import { Auth } from '@/store/_auth';
 import type { Library } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -13,6 +14,7 @@ import {
 } from 'antd';
 import axios from 'axios';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 interface FormValues {
   name: string;
@@ -34,6 +36,7 @@ export const CreateLibraryView: React.FC<Props> = ({
   const [form] = Form.useForm<FormValues>();
   const [saving, setSaving] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const isLocalUser = useSelector(Auth.select.isLocal);
 
   const handleSubmit = async (values: FormValues) => {
     if (!values.name?.trim()) {
@@ -82,12 +85,18 @@ export const CreateLibraryView: React.FC<Props> = ({
           <Input.TextArea placeholder="Optional description" rows={3} />
         </Form.Item>
 
-        <Form.Item label="Visibility" name="is_public" valuePropName="checked">
-          <Space>
-            <Switch />
-            <Typography.Text>Visible to everyone</Typography.Text>
-          </Space>
-        </Form.Item>
+        {!isLocalUser && (
+          <Form.Item
+            label="Visibility"
+            name="is_public"
+            valuePropName="checked"
+          >
+            <Space>
+              <Switch />
+              <Typography.Text>Visible to everyone</Typography.Text>
+            </Space>
+          </Form.Item>
+        )}
 
         <Form.Item>
           <Flex gap={8} justify="flex-end">
