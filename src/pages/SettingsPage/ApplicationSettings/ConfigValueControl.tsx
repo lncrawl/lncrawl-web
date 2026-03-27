@@ -12,6 +12,7 @@ export const ConfigValueControl: React.FC<{
       <Input.Password
         visibilityToggle
         disabled={saving}
+        autoComplete="off"
         value={String(v || '')}
         onChange={(e) => onValueChange(e.target.value)}
         placeholder={String(c.value || 'Enter secret string')}
@@ -33,10 +34,11 @@ export const ConfigValueControl: React.FC<{
     return (
       <InputNumber
         disabled={saving}
-        style={{ width: '100%', maxWidth: 360 }}
+        autoComplete="off"
         value={typeof v === 'number' ? v : v ? Number(v) : null}
         onChange={(n) => onValueChange(n ?? null)}
         placeholder="Enter a number"
+        style={{ width: '100%', maxWidth: 360 }}
       />
     );
   }
@@ -45,6 +47,7 @@ export const ConfigValueControl: React.FC<{
     return (
       <Input
         disabled={saving}
+        autoComplete="off"
         value={String(v || '')}
         onChange={(e) => onValueChange(e.target.value)}
         placeholder="Enter a string"
@@ -55,11 +58,12 @@ export const ConfigValueControl: React.FC<{
   const str = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
   return (
     <Input.TextArea
-      value={str}
       disabled={saving}
-      autoSize={{ minRows: 3, maxRows: 14 }}
+      autoComplete="off"
+      value={str}
       onChange={(e) => onValueChange(e.target.value)}
       placeholder="Enter any text value"
+      autoSize={{ minRows: 3, maxRows: 14 }}
       style={{
         fontFamily: 'Roboto Mono, monospace',
         fontSize: 12,

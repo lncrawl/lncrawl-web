@@ -103,6 +103,7 @@ export const VolumeListCard: React.FC<{
       ) : (
         <Collapse
           accordion
+          defaultActiveKey={volumes[0]?.id}
           items={volumes.map((volume) => ({
             key: volume.id,
             label: volume.title,

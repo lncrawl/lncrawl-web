@@ -32,7 +32,7 @@ export const SwitchUserButton: React.FC<{
     store.dispatch(Auth.action.removeUserHistory(user.id));
   };
 
-  if (availableUsers.length < 2) {
+  if (!availableUsers?.length) {
     return null;
   }
 
