@@ -199,6 +199,28 @@ export interface ReadChapter {
   previous_id?: string;
 }
 
+export interface ConfigProperty {
+  key: string;
+  display_name: string;
+  description: string;
+  value_kind: 'boolean' | 'number' | 'string' | 'any';
+  value: any;
+  sensitive: boolean;
+}
+
+export interface ConfigSection {
+  key: string;
+  display_name: string;
+  description: string;
+  properties: ConfigProperty[];
+}
+
+export interface ConfigUpdateRequest {
+  section: string;
+  key: string;
+  value: unknown;
+}
+
 export interface Feedback extends _Base {
   user_id: string;
   type: FeedbackType;

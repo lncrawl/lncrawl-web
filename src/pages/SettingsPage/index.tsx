@@ -1,3 +1,4 @@
+import { ApplicationSettings } from '@/pages/SettingsPage/ApplicationSettings';
 import { ReaderSettings } from '@/pages/SettingsPage/ReaderSettings';
 import { Auth } from '@/store/_auth';
 import { SettingOutlined } from '@ant-design/icons';
@@ -7,6 +8,7 @@ import { NotificationSettings } from './NotificationSettings';
 
 export const SettingsPage: React.FC<any> = () => {
   const isLocalUser = useSelector(Auth.select.isLocal);
+  const isAdmin = useSelector(Auth.select.isAdmin);
 
   const items: CollapseProps['items'] = [
     ...(isLocalUser
@@ -23,6 +25,15 @@ export const SettingsPage: React.FC<any> = () => {
       label: 'Reader',
       children: <ReaderSettings />,
     },
+    ...(isAdmin
+      ? [
+          {
+            key: 'backend',
+            label: 'Backend',
+            children: <ApplicationSettings />,
+          },
+        ]
+      : []),
   ];
 
   const allKeys = items.map((x) => String(x.key)).filter(Boolean);

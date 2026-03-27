@@ -1,0 +1,69 @@
+import type { ConfigProperty } from '@/types';
+import { Input, InputNumber, Switch } from 'antd';
+
+export const ConfigValueControl: React.FC<{
+  config: ConfigProperty;
+  value: unknown;
+  saving: boolean;
+  onValueChange: (next: unknown) => void;
+}> = ({ config: c, value: v, saving, onValueChange }) => {
+  if (c.sensitive) {
+    return (
+      <Input.Password
+        visibilityToggle
+        disabled={saving}
+        value={String(v || '')}
+        onChange={(e) => onValueChange(e.target.value)}
+        placeholder={String(c.value || 'Enter secret string')}
+      />
+    );
+  }
+
+  if (c.value_kind === 'boolean') {
+    return (
+      <Switch
+        disabled={saving}
+        checked={Boolean(v)}
+        onChange={(checked) => onValueChange(checked)}
+      />
+    );
+  }
+
+  if (c.value_kind === 'number') {
+    return (
+      <InputNumber
+        disabled={saving}
+        style={{ width: '100%', maxWidth: 360 }}
+        value={typeof v === 'number' ? v : v ? Number(v) : null}
+        onChange={(n) => onValueChange(n ?? null)}
+        placeholder="Enter a number"
+      />
+    );
+  }
+
+  if (c.value_kind === 'string') {
+    return (
+      <Input
+        disabled={saving}
+        value={String(v || '')}
+        onChange={(e) => onValueChange(e.target.value)}
+        placeholder="Enter a string"
+      />
+    );
+  }
+
+  const str = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+  return (
+    <Input.TextArea
+      value={str}
+      disabled={saving}
+      autoSize={{ minRows: 3, maxRows: 14 }}
+      onChange={(e) => onValueChange(e.target.value)}
+      placeholder="Enter any text value"
+      style={{
+        fontFamily: 'Roboto Mono, monospace',
+        fontSize: 12,
+      }}
+    />
+  );
+};
