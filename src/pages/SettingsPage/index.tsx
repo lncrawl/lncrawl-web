@@ -1,3 +1,4 @@
+import { AdminActions } from '@/pages/SettingsPage/AdminActions';
 import { ApplicationSettings } from '@/pages/SettingsPage/ApplicationSettings';
 import { ReaderSettings } from '@/pages/SettingsPage/ReaderSettings';
 import { Auth } from '@/store/_auth';
@@ -11,6 +12,15 @@ export const SettingsPage: React.FC<any> = () => {
   const isAdmin = useSelector(Auth.select.isAdmin);
 
   const items: CollapseProps['items'] = [
+    ...(isAdmin
+      ? [
+          {
+            key: 'admin-actions',
+            label: 'Admin actions',
+            children: <AdminActions />,
+          },
+        ]
+      : []),
     ...(isLocalUser
       ? []
       : [

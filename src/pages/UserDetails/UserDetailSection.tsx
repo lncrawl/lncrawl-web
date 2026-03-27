@@ -120,7 +120,7 @@ export const UserDetailSection: React.FC<{
         <UserStatusTag value={user.is_active} />
         {user.id !== currentUser?.id && (
           <>
-            <Divider orientation="vertical" />
+            <Divider vertical />
             <UserStatusActions user={user} onChange={onChange} />
           </>
         )}
@@ -136,7 +136,7 @@ export const UserDetailSection: React.FC<{
         <Typography.Text>{referenceCount} users</Typography.Text>
         {referenceCount > 0 && (
           <>
-            <Divider orientation="vertical" />
+            <Divider vertical />
             <Link to={`/admin/users?referrer=${user.id}`}>See references</Link>
           </>
         )}
@@ -150,7 +150,7 @@ export const UserDetailSection: React.FC<{
         }
       >
         <Typography.Text>{formatDate(user.created_at)}</Typography.Text>
-        <Divider orientation="vertical" />
+        <Divider vertical />
         <Typography.Text type="secondary">
           {formatFromNow(user.created_at)}
         </Typography.Text>
@@ -164,7 +164,7 @@ export const UserDetailSection: React.FC<{
         }
       >
         <Typography.Text>{formatDate(user.updated_at)}</Typography.Text>
-        <Divider orientation="vertical" />
+        <Divider vertical />
         <Typography.Text type="secondary">
           {formatFromNow(user.updated_at)}
         </Typography.Text>

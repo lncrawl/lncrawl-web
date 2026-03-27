@@ -100,7 +100,7 @@ export const LibraryCard: React.FC<{ library: Library }> = ({ library }) => {
                   {library.user_id === user?.id ? ' (you)' : ''}
                 </Typography.Text>
               </Space>
-              <Divider orientation="vertical" />
+              <Divider vertical />
             </>
           )}
           <Space size="small">

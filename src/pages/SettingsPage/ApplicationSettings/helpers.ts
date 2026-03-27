@@ -45,20 +45,3 @@ export function normalizeConfigValue(c: ConfigProperty, raw: unknown) {
   }
   return { ok: true, value: raw };
 }
-
-/** Whether to show a bottom divider after this item in a property list. */
-export function showConfigRowSeparator(
-  index: number,
-  total: number,
-  twoColumns: boolean
-): boolean {
-  if (total <= 1) {
-    return false;
-  }
-  if (twoColumns) {
-    const rowIdx = Math.floor(index / 2);
-    const lastRowIdx = Math.floor((total - 1) / 2);
-    return rowIdx < lastRowIdx;
-  }
-  return index < total - 1;
-}

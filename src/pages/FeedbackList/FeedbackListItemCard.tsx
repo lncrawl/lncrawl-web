@@ -67,7 +67,7 @@ export const FeedbackListItemCard: React.FC<{
         wrap
         size={0}
         style={{ marginTop: 4 }}
-        separator={<Divider orientation="vertical" />}
+        separator={<Divider vertical />}
       >
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
           <UserOutlined /> {feedback.extra?.user_name || 'Unknown'}

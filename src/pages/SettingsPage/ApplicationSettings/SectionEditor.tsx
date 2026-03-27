@@ -15,12 +15,7 @@ import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import styles from './ApplicationSettings.module.scss';
 import { ConfigPropertyRow } from './ConfigPropertyRow';
-import {
-  hasChange,
-  normalizeConfigValue,
-  rowKey,
-  showConfigRowSeparator,
-} from './helpers';
+import { hasChange, normalizeConfigValue, rowKey } from './helpers';
 
 export const SectionEditor: React.FC<{
   sections: ConfigSection[];
@@ -123,7 +118,7 @@ export const SectionEditor: React.FC<{
             </Space>
           ),
           children: (
-            <Row gutter={[20, 24]} className={styles.propertiesRow}>
+            <Row gutter={[20, 24]} style={{ width: '100%' }}>
               {section.properties.map((config, index) => {
                 const k = rowKey(section, config);
                 return (
@@ -135,11 +130,7 @@ export const SectionEditor: React.FC<{
                       onValueChange={(next) => {
                         setValues((prev) => ({ ...prev, [k]: next }));
                       }}
-                      showSeparator={showConfigRowSeparator(
-                        index,
-                        section.properties.length,
-                        Boolean(screens.xl)
-                      )}
+                      showSeparator={index >= (screens.xl ? 2 : 1)}
                     />
                   </Col>
                 );

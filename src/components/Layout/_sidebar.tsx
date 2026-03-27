@@ -175,7 +175,7 @@ export const MainLayoutSidebar: React.FC<{
           style={{ fontSize: 11, padding: '4px 16px' }}
         >
           <PrivacyPolicy />
-          <Divider orientation="vertical" />
+          <Divider vertical />
           <TermsOfService />
         </Flex>
       </Flex>

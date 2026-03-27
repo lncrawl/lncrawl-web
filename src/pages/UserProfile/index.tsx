@@ -70,7 +70,7 @@ export const UserProfilePage: React.FC<any> = () => {
           <Space>
             <UserAvatar user={user} size={32} />
             <Typography.Text>{user.name}</Typography.Text>
-            <Divider orientation="vertical" />
+            <Divider vertical />
             <ProfileNameChangeButton user={user} onChange={updateUser} />
           </Space>
         </Descriptions.Item>
@@ -136,7 +136,7 @@ export const UserProfilePage: React.FC<any> = () => {
           }
         >
           <Typography.Text>{formatDate(user.created_at)}</Typography.Text>
-          <Divider orientation="vertical" />
+          <Divider vertical />
           <Typography.Text type="secondary">
             {formatFromNow(user.created_at)}
           </Typography.Text>

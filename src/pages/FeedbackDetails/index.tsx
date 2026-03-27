@@ -172,7 +172,7 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
           {feedback.message}
         </Typography.Paragraph>
 
-        <Space size="small" separator={<Divider orientation="vertical" />}>
+        <Space size="small" separator={<Divider vertical />}>
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
             <UserOutlined /> {feedback?.extra?.user_name || 'Unknown'}
           </Typography.Text>
