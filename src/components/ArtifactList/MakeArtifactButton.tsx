@@ -1,9 +1,13 @@
-import { OutputFormatTag } from '@/components/Tags/OutputFormatTag';
+import { OUTPUT_FORMAT_META } from '@/components/Tags/OutputFormatTag';
 import { Auth } from '@/store/_auth';
 import { OutputFormat, type Job } from '@/types';
 import { stringifyError } from '@/utils/errors';
-import { AppstoreAddOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Col, Modal, Row, Typography, message } from 'antd';
+import {
+  AppstoreAddOutlined,
+  CheckOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
+import { Button, Col, Flex, Modal, Row, Typography, message } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -35,7 +39,7 @@ export const MakeArtifactButton: React.FC<{
         const result = await axios.get<string[]>(
           '/api/artifact/enabled-formats'
         );
-        setOptions(result.data);
+        setOptions(result.data.sort());
       } catch {
         setOptions([OutputFormat.epub]);
       } finally {
@@ -91,7 +95,6 @@ export const MakeArtifactButton: React.FC<{
       <Modal
         width={400}
         open={open}
-        destroyOnHidden
         loading={changing}
         okText="Create"
         onOk={() =>
@@ -104,24 +107,43 @@ export const MakeArtifactButton: React.FC<{
           </Typography.Title>
         }
       >
-        <Row>
-          {options.map((value) => (
-            <Col xs={12} key={value}>
-              <Checkbox
-                checked={selected[value]}
-                onClick={() => toggleSelected(value)}
-                style={{
-                  width: '100%',
-                  borderRadius: 0,
-                  padding: '5px 10px',
-                  fontSize: '14px',
-                  justifyContent: 'flex-start',
-                }}
-              >
-                <OutputFormatTag value={value} />
-              </Checkbox>
-            </Col>
-          ))}
+        <Typography.Text
+          type="secondary"
+          style={{ marginBottom: 5, display: 'block' }}
+        >
+          Select the formats you want to create.
+        </Typography.Text>
+
+        <Row gutter={[6, 4]}>
+          {options.map((value) => {
+            const meta = OUTPUT_FORMAT_META[value];
+            return (
+              <Col xs={12} key={value}>
+                <Button
+                  block
+                  onClick={() => toggleSelected(value)}
+                  type={selected[value] ? 'primary' : 'default'}
+                  style={{
+                    borderRadius: 0,
+                    boxShadow: 'none',
+                    textAlign: 'left',
+                  }}
+                >
+                  <Flex
+                    gap={6}
+                    align="center"
+                    justify="space-between"
+                    style={{ width: '100%' }}
+                  >
+                    <span style={{ color: 'goldenrod', flex: 1 }}>
+                      {meta.icon} {meta.label}
+                    </span>
+                    {selected[value] ? <CheckOutlined /> : <PlusOutlined />}
+                  </Flex>
+                </Button>
+              </Col>
+            );
+          })}
         </Row>
       </Modal>
     </>
