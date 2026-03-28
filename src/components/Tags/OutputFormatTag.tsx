@@ -1,4 +1,4 @@
-import { OutputFormat, type Job } from '@/types';
+import { OutputFormat } from '@/types';
 import {
   AlignLeftOutlined,
   BookOutlined,
@@ -21,10 +21,10 @@ type OutputFormatMeta = {
   label: string;
   tooltip: string;
   icon: React.ReactNode;
-  color: TagProps['color'];
+  color?: TagProps['color'];
 };
 
-export const OUTPUT_FORMAT_META: Record<OutputFormat, OutputFormatMeta> = {
+const OUTPUT_FORMAT_META: Record<OutputFormat, OutputFormatMeta> = {
   [OutputFormat.json]: {
     label: 'json',
     tooltip: 'Structured data export for tools and automation',
@@ -41,13 +41,13 @@ export const OUTPUT_FORMAT_META: Record<OutputFormat, OutputFormatMeta> = {
     label: 'txt',
     tooltip: 'Plain text without formatting',
     icon: <AlignLeftOutlined />,
-    color: 'default',
+    color: 'lime',
   },
   [OutputFormat.pdf]: {
     label: 'pdf',
     tooltip: 'PDF document for printing or fixed-layout viewing',
     icon: <FilePdfOutlined />,
-    color: 'red',
+    color: 'volcano',
   },
   [OutputFormat.mobi]: {
     label: 'mobi',
@@ -65,13 +65,13 @@ export const OUTPUT_FORMAT_META: Record<OutputFormat, OutputFormatMeta> = {
     label: 'rtf',
     tooltip: 'Rich Text Format for word processors',
     icon: <SnippetsOutlined />,
-    color: 'lime',
+    color: 'success',
   },
   [OutputFormat.docx]: {
     label: 'docx',
     tooltip: 'Microsoft Word document',
     icon: <FileWordOutlined />,
-    color: 'success',
+    color: 'blue',
   },
   [OutputFormat.azw3]: {
     label: 'azw3',
@@ -83,7 +83,6 @@ export const OUTPUT_FORMAT_META: Record<OutputFormat, OutputFormatMeta> = {
     label: 'lit',
     tooltip: 'Microsoft Reader e-book',
     icon: <WindowsOutlined />,
-    color: 'blue',
   },
   [OutputFormat.lrf]: {
     label: 'lrf',
@@ -95,7 +94,7 @@ export const OUTPUT_FORMAT_META: Record<OutputFormat, OutputFormatMeta> = {
     label: 'pdb',
     tooltip: 'Palm Digital Media / eReader format',
     icon: <DatabaseOutlined />,
-    color: 'volcano',
+    color: 'red',
   },
   [OutputFormat.rb]: {
     label: 'rb',
@@ -107,44 +106,26 @@ export const OUTPUT_FORMAT_META: Record<OutputFormat, OutputFormatMeta> = {
     label: 'tcr',
     tooltip: 'Psion Series 3 e-book format',
     icon: <CalculatorOutlined />,
-    color: 'default',
+    color: 'geekblue',
   },
 };
 
-export const OutputFormatTag: React.FC<{
-  value: OutputFormat;
-}> = ({ value }) => {
+export const OutputFormatTag: React.FC<
+  {
+    value: OutputFormat;
+    noTooltip?: boolean;
+  } & TagProps
+> = ({ value, noTooltip, ...props }) => {
   const meta = OUTPUT_FORMAT_META[value];
   if (!meta) {
     return null;
   }
   const { icon, label, tooltip, color } = meta;
   return (
-    <Tooltip title={tooltip}>
-      <Tag color={color} icon={icon}>
+    <Tooltip title={noTooltip ? undefined : tooltip}>
+      <Tag color={color} icon={icon} {...props}>
         {label}
       </Tag>
     </Tooltip>
   );
 };
-
-/** Ordered formats from job extra (batch jobs use `formats`, single-artifact jobs use `format`). */
-export function getJobOutputFormats(extra: Job['extra']): OutputFormat[] {
-  if (extra.formats?.length) {
-    return extra.formats;
-  }
-  if (extra.format) {
-    return [extra.format];
-  }
-  return [];
-}
-
-/** Plain-text line for bug reports / logs (e.g. `Format: EPUB, PDF`). */
-export function formatSummaryLine(extra: Job['extra']): string | undefined {
-  const list = getJobOutputFormats(extra);
-  if (!list.length) {
-    return undefined;
-  }
-  const labels = list.map((f) => OUTPUT_FORMAT_META[f]?.label ?? f);
-  return `Format: ${labels.join(', ')}`;
-}

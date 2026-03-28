@@ -1,4 +1,3 @@
-import { formatSummaryLine } from '@/components/Tags/OutputFormatTag';
 import type { Feedback, Job } from '@/types';
 import { FeedbackType } from '@/types';
 import { stringifyError } from '@/utils/errors';
@@ -84,7 +83,6 @@ export const JobIssueReportButton: React.FC<{
               job.extra.chapter_serial &&
                 `Chapter: ${job.extra.chapter_serial}`,
               job.extra.volume_serial && `Volume: ${job.extra.volume_serial}`,
-              formatSummaryLine(job.extra),
               job.error &&
                 `Error: ${job.error.trim().split('\n').reverse()[0]}`,
             ]

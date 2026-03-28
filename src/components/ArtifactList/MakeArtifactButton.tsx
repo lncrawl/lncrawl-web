@@ -1,4 +1,4 @@
-import { OUTPUT_FORMAT_META } from '@/components/Tags/OutputFormatTag';
+import { OutputFormatTag } from '@/components/Tags/OutputFormatTag';
 import { Auth } from '@/store/_auth';
 import { OutputFormat, type Job } from '@/types';
 import { stringifyError } from '@/utils/errors';
@@ -115,35 +115,39 @@ export const MakeArtifactButton: React.FC<{
         </Typography.Text>
 
         <Row gutter={[6, 4]}>
-          {options.map((value) => {
-            const meta = OUTPUT_FORMAT_META[value];
-            return (
-              <Col xs={12} key={value}>
-                <Button
-                  block
-                  onClick={() => toggleSelected(value)}
-                  type={selected[value] ? 'primary' : 'default'}
-                  style={{
-                    borderRadius: 0,
-                    boxShadow: 'none',
-                    textAlign: 'left',
-                  }}
+          {options.map((value) => (
+            <Col xs={12} key={value}>
+              <Button
+                block
+                size="large"
+                onClick={() => toggleSelected(value)}
+                type={selected[value] ? 'primary' : 'default'}
+                style={{
+                  borderRadius: 0,
+                  boxShadow: 'none',
+                  textAlign: 'left',
+                }}
+              >
+                <Flex
+                  gap={6}
+                  align="center"
+                  justify="space-between"
+                  style={{ width: '100%' }}
                 >
-                  <Flex
-                    gap={6}
-                    align="center"
-                    justify="space-between"
-                    style={{ width: '100%' }}
-                  >
-                    <span style={{ color: 'goldenrod', flex: 1 }}>
-                      {meta.icon} {meta.label}
-                    </span>
-                    {selected[value] ? <CheckOutlined /> : <PlusOutlined />}
-                  </Flex>
-                </Button>
-              </Col>
-            );
-          })}
+                  <OutputFormatTag
+                    noTooltip
+                    value={value}
+                    style={{
+                      border: 'none',
+                      fontSize: '0.9em',
+                      background: 'transparent',
+                    }}
+                  />
+                  {selected[value] ? <CheckOutlined /> : <PlusOutlined />}
+                </Flex>
+              </Button>
+            </Col>
+          ))}
         </Row>
       </Modal>
     </>
