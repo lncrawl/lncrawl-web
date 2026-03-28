@@ -1,1 +1,0 @@
-import{q as n,e as i,j as o}from"./index-DSZvyxBQ.js";import{a as e,A as c}from"./vendor-antd-BaE-hzH3.js";import{x as m}from"./vendor-antd-icons-YQT_F1wf.js";const j=({url:s,...r})=>{const a=e.useMemo(()=>{if(!s)return null;const t=n.stringify({url:s});return`${i}/api/meta/favicon?${t}`},[s]);return o.jsx(c,{size:24,icon:o.jsx(m,{}),...r,src:a})};export{j as F};
