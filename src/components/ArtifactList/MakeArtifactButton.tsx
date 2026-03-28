@@ -1,3 +1,4 @@
+import { OutputFormatTag } from '@/components/Tags/OutputFormatTag';
 import { Auth } from '@/store/_auth';
 import { OutputFormat, type Job } from '@/types';
 import { stringifyError } from '@/utils/errors';
@@ -114,11 +115,10 @@ export const MakeArtifactButton: React.FC<{
                   borderRadius: 0,
                   padding: '5px 10px',
                   fontSize: '14px',
-                  fontFamily: 'monospace',
                   justifyContent: 'flex-start',
                 }}
               >
-                {value}
+                <OutputFormatTag value={value} />
               </Checkbox>
             </Col>
           ))}

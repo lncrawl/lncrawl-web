@@ -8,8 +8,8 @@ import { formatDate, formatDuration } from '@/utils/time';
 import { ClockCircleFilled, ClockCircleOutlined } from '@ant-design/icons';
 import { Card, Flex, Grid, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import { JobActionButtons } from './JobActionButtons';
 import { JobProgressLine } from '../JobList/JobProgessBar';
+import { JobActionButtons } from './JobActionButtons';
 import { JobErrorDetailsCard } from './JobErrorDetailsCard';
 
 export const JobDetailsCard: React.FC<{

@@ -1,3 +1,4 @@
+import { OutputFormatTag } from '@/components/Tags/OutputFormatTag';
 import { API_BASE_URL } from '@/config';
 import { Auth } from '@/store/_auth';
 import { type Artifact } from '@/types';
@@ -8,9 +9,8 @@ import {
   DownloadOutlined,
   ExclamationCircleOutlined,
   FileZipFilled,
-  TagOutlined,
 } from '@ant-design/icons';
-import { Button, Flex, Grid, List, Tag, Tooltip, Typography } from 'antd';
+import { Button, Flex, Grid, List, Tooltip, Typography } from 'antd';
 import { useSelector } from 'react-redux';
 
 export const ArtifactListItemCard: React.FC<{ artifact: Artifact }> = ({
@@ -48,7 +48,7 @@ export const ArtifactListItemCard: React.FC<{ artifact: Artifact }> = ({
         }
         title={
           <Flex wrap="wrap-reverse" gap={8} align="center">
-            <Tag icon={<TagOutlined />}>{item.format}</Tag>
+            <OutputFormatTag value={item.format} />
             {Boolean(item.file_size && item.file_size > 0) && (
               <Typography.Text
                 type="warning"
