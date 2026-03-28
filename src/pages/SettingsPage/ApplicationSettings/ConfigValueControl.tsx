@@ -10,9 +10,10 @@ export const ConfigValueControl: React.FC<{
   if (c.sensitive) {
     return (
       <Input.Password
+        name={c.key}
         visibilityToggle
         disabled={saving}
-        autoComplete="off"
+        autoComplete="new-password"
         value={String(v || '')}
         onChange={(e) => onValueChange(e.target.value)}
         placeholder={String(c.value || 'Enter secret string')}
@@ -33,6 +34,7 @@ export const ConfigValueControl: React.FC<{
   if (c.value_kind === 'number') {
     return (
       <InputNumber
+        name={c.key}
         disabled={saving}
         autoComplete="off"
         value={typeof v === 'number' ? v : v ? Number(v) : null}
@@ -46,6 +48,7 @@ export const ConfigValueControl: React.FC<{
   if (c.value_kind === 'string') {
     return (
       <Input
+        name={c.key}
         disabled={saving}
         autoComplete="off"
         value={String(v || '')}
@@ -58,6 +61,7 @@ export const ConfigValueControl: React.FC<{
   const str = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
   return (
     <Input.TextArea
+      name={c.key}
       disabled={saving}
       autoComplete="off"
       value={str}
