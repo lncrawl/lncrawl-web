@@ -1,11 +1,22 @@
-import { Divider, Flex, Grid, Select, Typography } from 'antd';
+import { SyncOutlined } from '@ant-design/icons';
+import { Button, Divider, Flex, Grid, Select, Typography } from 'antd';
 import { JobStatusFilterParams, JobTypeFilterParams } from './constants';
 import type { JobListHook } from './hooks';
 
-export const JobFilterBox: React.FC<
-  Pick<JobListHook, 'type' | 'status' | 'updateParams'>
-> = ({ status, type, updateParams }) => {
+export const JobFilterBox: React.FC<JobListHook> = ({
+  status,
+  type,
+  updateParams,
+  refresh: onRefresh,
+  loading: refreshSpinning,
+  requiresRefresh,
+}) => {
   const { lg } = Grid.useBreakpoint();
+
+  const handleRefresh = () => {
+    if (refreshSpinning) return;
+    onRefresh();
+  };
 
   return (
     <Flex justify="space-between" align="center" wrap gap={5}>
@@ -50,6 +61,16 @@ export const JobFilterBox: React.FC<
       </Flex>
 
       {lg && <div style={{ flex: 1 }} />}
+
+      {requiresRefresh && (
+        <Button
+          type="default"
+          onClick={handleRefresh}
+          icon={<SyncOutlined spin={!!refreshSpinning} />}
+        >
+          Refresh
+        </Button>
+      )}
     </Flex>
   );
 };

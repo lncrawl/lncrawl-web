@@ -6,6 +6,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { JobStatusFilterParams, JobTypeFilterParams } from './constants';
 
+const DEFAULT_PER_PAGE = 10;
+const FETCH_JOB_DELAY = 50;
+const REFRESH_INTERVAL = 5000;
+
 interface SearchParams {
   page?: number;
   type?: JobType;
@@ -26,7 +30,7 @@ export function useJobList(
   const [total, setTotal] = useState(0);
   const [jobs, setJobs] = useState<Job[]>([]);
 
-  const perPage = 10;
+  const perPage = DEFAULT_PER_PAGE;
 
   const currentPage = useMemo(
     () => parseInt(searchParams.get('page') || '1', 10),
@@ -49,8 +53,27 @@ export function useJobList(
     }
   }, [searchParams]);
 
+  const hasIncompleteJobs = useMemo(() => {
+    if (error) return false;
+    for (const job of jobs) {
+      if (!job.is_done) {
+        return true;
+      }
+    }
+    return false;
+  }, [error, jobs]);
+
+  const requiresRefresh = useMemo(() => {
+    return hasIncompleteJobs || (autoRefresh && currentPage === 1);
+  }, [hasIncompleteJobs, autoRefresh, currentPage]);
+
+  const refresh = useCallback(() => {
+    setRefreshId((v) => v + 1);
+  }, []);
+
   useEffect(() => {
     const fetchJobs = async () => {
+      setLoading(true);
       setError(undefined);
       try {
         const offset = (currentPage - 1) * perPage;
@@ -75,7 +98,7 @@ export function useJobList(
         setLoading(false);
       }
     };
-    const tid = setTimeout(fetchJobs, 50);
+    const tid = setTimeout(fetchJobs, FETCH_JOB_DELAY);
     return () => clearTimeout(tid);
   }, [
     parentJobId,
@@ -87,31 +110,12 @@ export function useJobList(
     refreshId,
   ]);
 
-  const hasIncompleteJobs = useMemo(() => {
-    if (error) return false;
-    for (const job of jobs) {
-      if (!job.is_done) {
-        return true;
-      }
-    }
-    return false;
-  }, [error, jobs]);
-
   useEffect(() => {
-    // refresh if it has incomplete jobs
-    // or auto refresh is on in the first page,
-    if (hasIncompleteJobs || (autoRefresh && currentPage === 1)) {
-      const iid = setInterval(() => {
-        setRefreshId((v) => v + 1);
-      }, 5000);
+    if (requiresRefresh) {
+      const iid = setInterval(refresh, REFRESH_INTERVAL);
       return () => clearInterval(iid);
     }
-  }, [autoRefresh, currentPage, hasIncompleteJobs]);
-
-  const refresh = useCallback(() => {
-    setLoading(true);
-    setRefreshId((v) => v + 1);
-  }, []);
+  }, [requiresRefresh, refresh]);
 
   const updateParams: (updates: SearchParams) => any = useMemo(() => {
     return debounce((updates: SearchParams) => {
@@ -160,6 +164,7 @@ export function useJobList(
     total,
     loading,
     error,
+    requiresRefresh,
     refresh,
     updateParams,
   };

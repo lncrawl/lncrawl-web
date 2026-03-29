@@ -21,6 +21,7 @@ export const JobListPage: React.FC<{
   parentJobId,
   disableFilters,
 }) => {
+  const hookResult = useJobList(autoRefresh, userId, parentJobId);
   const {
     currentPage,
     error,
@@ -32,9 +33,9 @@ export const JobListPage: React.FC<{
     type,
     refresh,
     updateParams,
-  } = useJobList(autoRefresh, userId, parentJobId);
+  } = hookResult;
 
-  if (loading) {
+  if (loading && !jobs?.length) {
     return <LoadingState />;
   }
 
@@ -63,11 +64,7 @@ export const JobListPage: React.FC<{
       {title && <Divider size="small" />}
       {!disableFilters && (
         <>
-          <JobFilterBox
-            status={status}
-            type={type}
-            updateParams={updateParams}
-          />
+          <JobFilterBox {...hookResult} />
           <Divider size="small" />
         </>
       )}
