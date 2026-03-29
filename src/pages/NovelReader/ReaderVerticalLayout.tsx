@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import styles from './ReaderVerticalLayout.module.scss';
+import styles from './layout.module.scss';
 
 import { store } from '@/store';
 import { Reader } from '@/store/_reader';

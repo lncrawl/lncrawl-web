@@ -1,4 +1,4 @@
-export const focusReaderPosition = (position: number) => {
+export function focusReaderPosition(position: number) {
   const fid = requestAnimationFrame(() => {
     const el = document.getElementById('chapter-content');
     if (!el) return;
@@ -13,4 +13,4 @@ export const focusReaderPosition = (position: number) => {
     });
   });
   return () => cancelAnimationFrame(fid);
-};
+}

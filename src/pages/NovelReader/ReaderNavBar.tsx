@@ -16,7 +16,7 @@ import { Flex, Grid } from 'antd';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { ReaderSettingsButton } from './ReaderSettingsButton';
-import { focusReaderPosition } from './utils';
+import { focusReaderPosition } from './helpers';
 
 export const ReaderNavBar: React.FC<{
   data: ReadChapter;

@@ -1,4 +1,8 @@
 /// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_API_BASE_URL?: string;
+}
 /// <reference types="vite-plugin-pwa/client" />
 
 declare module 'virtual:pwa-register' {
