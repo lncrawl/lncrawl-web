@@ -1,6 +1,8 @@
 import { ArtifactListCard } from '@/components/ArtifactList/ArtifactListCard';
 import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
+import { Auth } from '@/store/_auth';
+import { Config } from '@/store/_config';
 import {
   type Artifact,
   type Chapter,
@@ -15,6 +17,7 @@ import { Divider, Grid, Space, Typography } from 'antd';
 import axios from 'axios';
 import { LRUCache } from 'lru-cache';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { JobListPage } from '../JobList';
 import { ChapterDetailsCard } from '../NovelDetails/ChapterDetailsCard';
@@ -22,8 +25,6 @@ import { NovelDetailsCard } from '../NovelDetails/NovelDetailsCard';
 import { VolumeDetailsCard } from '../NovelDetails/VolumeDetailsCard';
 import { JobDetailsCard } from './JobDetailsCard';
 import { UserDetailsCard } from './UserDetailsCard';
-import { useSelector } from 'react-redux';
-import { Auth } from '@/store/_auth';
 
 const _cache = new LRUCache<string, any>({
   max: 1000,
@@ -56,6 +57,9 @@ export const JobDetailsPage: React.FC<any> = () => {
   const { lg } = Grid.useBreakpoint();
   const { id } = useParams<{ id: string }>();
   const isLocalUser = useSelector(Auth.select.isLocal);
+  const jobDetailsPollIntervalMs = useSelector(
+    Config.select.jobDetailsPollIntervalMs
+  );
 
   const [refreshId, setRefreshId] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -110,12 +114,12 @@ export const JobDetailsPage: React.FC<any> = () => {
     if (job && !job.is_done) {
       const iid = setInterval(() => {
         setRefreshId((v) => v + 1);
-      }, 2000);
+      }, jobDetailsPollIntervalMs);
       return () => {
         clearInterval(iid);
       };
     }
-  }, [job]);
+  }, [job, jobDetailsPollIntervalMs]);
 
   if (loading) {
     return <LoadingState />;
@@ -125,7 +129,7 @@ export const JobDetailsPage: React.FC<any> = () => {
     return (
       <ErrorState
         error={error}
-        title="Failed to load job data"
+        title="Failed to load request"
         onRetry={() => {
           setLoading(true);
           setRefreshId((v) => v + 1);
@@ -141,7 +145,7 @@ export const JobDetailsPage: React.FC<any> = () => {
           <LeftOutlined /> Parent Request
         </Link>
       ) : (
-        <Link to={`/jobs`}>
+        <Link to="/">
           <LeftOutlined /> All Requests
         </Link>
       )}

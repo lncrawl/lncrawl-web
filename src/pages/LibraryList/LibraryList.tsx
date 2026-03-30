@@ -1,14 +1,14 @@
 import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
+import { Config } from '@/store/_config';
 import type { Library, Paginated } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Empty, Flex, Input, Pagination, Row } from 'antd';
 import axios from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { LibraryCard } from './LibraryCard';
-
-const PAGE_SIZE = 18;
 
 type SearchParams = {
   tab?: string;
@@ -20,6 +20,7 @@ export const LibraryList: React.FC<{
   refreshId?: number;
   type: 'public' | 'my' | 'all';
 }> = ({ type, refreshId }) => {
+  const pageSize = useSelector(Config.select.libraryListPageSize);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [loading, setLoading] = useState(true);
@@ -65,14 +66,14 @@ export const LibraryList: React.FC<{
       setLoading(true);
       setError(undefined);
       try {
-        const offset = (page - 1) * PAGE_SIZE;
+        const offset = (page - 1) * pageSize;
         const { data } = await axios.get<Paginated<Library>>(
           `/api/library/${type}`,
           {
             params: {
               query,
               offset,
-              limit: PAGE_SIZE,
+              limit: pageSize,
             },
           }
         );
@@ -86,7 +87,7 @@ export const LibraryList: React.FC<{
     };
 
     loadLibraries();
-  }, [page, query, refreshId, type]);
+  }, [page, query, refreshId, type, pageSize]);
 
   return (
     <Flex vertical gap={16}>
@@ -122,7 +123,7 @@ export const LibraryList: React.FC<{
         current={page}
         total={total}
         hideOnSinglePage
-        pageSize={PAGE_SIZE}
+        pageSize={pageSize}
         showSizeChanger={false}
         onChange={(page) => updateParams({ page })}
       />

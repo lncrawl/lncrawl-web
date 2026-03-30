@@ -1,10 +1,15 @@
+import { Config } from '@/store/_config';
 import { Flex, Space, Spin, Tag, Typography } from 'antd';
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { StartRunnerButton } from './StartRunnerButton';
 import { StopRunnerButton } from './StopRunnerButton';
 
 export const RunnerStatusActions: React.FC<any> = () => {
+  const adminRunnerPollMs = useSelector(
+    Config.select.adminRunnerStatusPollIntervalMs
+  );
   const [isRunning, setIsRunning] = useState<boolean | undefined>();
 
   const fetchStatus = useCallback(async () => {
@@ -22,12 +27,15 @@ export const RunnerStatusActions: React.FC<any> = () => {
 
   useEffect(() => {
     const tid = window.setTimeout(() => void refreshStatus(), 0);
-    const iid = window.setInterval(() => void refreshStatus(), 5000);
+    const iid = window.setInterval(
+      () => void refreshStatus(),
+      adminRunnerPollMs
+    );
     return () => {
       clearTimeout(tid);
       clearInterval(iid);
     };
-  }, [refreshStatus]);
+  }, [refreshStatus, adminRunnerPollMs]);
 
   return (
     <Flex vertical gap={12}>

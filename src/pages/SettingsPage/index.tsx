@@ -5,6 +5,7 @@ import { Auth } from '@/store/_auth';
 import { SettingOutlined } from '@ant-design/icons';
 import { Collapse, Typography, type CollapseProps } from 'antd';
 import { useSelector } from 'react-redux';
+import { FrontendSettings } from '@/pages/SettingsPage/FrontendSettings';
 import { NotificationSettings } from './NotificationSettings';
 
 export const SettingsPage: React.FC<any> = () => {
@@ -34,6 +35,11 @@ export const SettingsPage: React.FC<any> = () => {
       key: 'reader',
       label: 'Reader',
       children: <ReaderSettings />,
+    },
+    {
+      key: 'frontend',
+      label: 'Frontend',
+      children: <FrontendSettings />,
     },
     ...(isAdmin
       ? [

@@ -1,14 +1,12 @@
+import { Config } from '@/store/_config';
 import { JobType, type Job, type Paginated } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import axios from 'axios';
 import { debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { JobStatusFilterParams, JobTypeFilterParams } from './constants';
-
-const DEFAULT_PER_PAGE = 10;
-const FETCH_JOB_DELAY = 50;
-const REFRESH_INTERVAL = 5000;
 
 interface SearchParams {
   page?: number;
@@ -30,7 +28,12 @@ export function useJobList(
   const [total, setTotal] = useState(0);
   const [jobs, setJobs] = useState<Job[]>([]);
 
-  const perPage = DEFAULT_PER_PAGE;
+  const perPage = useSelector(Config.select.jobListPageSize);
+  const listFetchDelayMs = useSelector(Config.select.listFetchDelayMs);
+  const jobListRefreshIntervalMs = useSelector(
+    Config.select.jobListRefreshIntervalMs
+  );
+  const listFilterDebounceMs = useSelector(Config.select.listFilterDebounceMs);
 
   const currentPage = useMemo(
     () => parseInt(searchParams.get('page') || '1', 10),
@@ -98,7 +101,7 @@ export function useJobList(
         setLoading(false);
       }
     };
-    const tid = setTimeout(fetchJobs, FETCH_JOB_DELAY);
+    const tid = setTimeout(fetchJobs, listFetchDelayMs);
     return () => clearTimeout(tid);
   }, [
     parentJobId,
@@ -108,14 +111,15 @@ export function useJobList(
     status,
     perPage,
     refreshId,
+    listFetchDelayMs,
   ]);
 
   useEffect(() => {
     if (requiresRefresh) {
-      const iid = setInterval(refresh, REFRESH_INTERVAL);
+      const iid = setInterval(refresh, jobListRefreshIntervalMs);
       return () => clearInterval(iid);
     }
-  }, [requiresRefresh, refresh]);
+  }, [requiresRefresh, refresh, jobListRefreshIntervalMs]);
 
   const updateParams: (updates: SearchParams) => any = useMemo(() => {
     return debounce((updates: SearchParams) => {
@@ -152,8 +156,8 @@ export function useJobList(
         }
         return next;
       });
-    }, 100);
-  }, [setSearchParams]);
+    }, listFilterDebounceMs);
+  }, [setSearchParams, listFilterDebounceMs]);
 
   return {
     type,

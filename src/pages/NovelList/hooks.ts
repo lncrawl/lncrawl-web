@@ -1,9 +1,11 @@
+import { Config } from '@/store/_config';
 import type { Novel, Paginated } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Grid } from 'antd';
 import axios from 'axios';
 import { debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
 interface SearchParams {
@@ -38,16 +40,21 @@ export function useNovelList() {
     [searchParams]
   );
 
+  const pageSizeXl = useSelector(Config.select.novelListPageSizeXl);
+  const pageSizeLg = useSelector(Config.select.novelListPageSizeLg);
+  const pageSizeSm = useSelector(Config.select.novelListPageSizeSm);
+  const listFetchDelayMs = useSelector(Config.select.listFetchDelayMs);
+  const listFilterDebounceMs = useSelector(Config.select.listFilterDebounceMs);
+
   const perPage = useMemo(() => {
-    // xs={8} lg={6} xl={4}
     if (breakpoint.xl) {
-      return 48;
-    } else if (breakpoint.lg) {
-      return 32;
-    } else {
-      return 24;
+      return pageSizeXl;
     }
-  }, [breakpoint.xl, breakpoint.lg]);
+    if (breakpoint.lg) {
+      return pageSizeLg;
+    }
+    return pageSizeSm;
+  }, [breakpoint.xl, breakpoint.lg, pageSizeXl, pageSizeLg, pageSizeSm]);
 
   const fetchNovels = async (
     search: string,
@@ -73,9 +80,9 @@ export function useNovelList() {
   useEffect(() => {
     const tid = setTimeout(() => {
       fetchNovels(search, domain, currentPage, perPage);
-    }, 50);
+    }, listFetchDelayMs);
     return () => clearTimeout(tid);
-  }, [search, domain, currentPage, perPage, refreshId]);
+  }, [search, domain, currentPage, perPage, refreshId, listFetchDelayMs]);
 
   const refresh = useCallback(() => {
     setLoading(true);
@@ -103,8 +110,8 @@ export function useNovelList() {
         }
         return next;
       });
-    }, 100);
-  }, [setSearchParams]);
+    }, listFilterDebounceMs);
+  }, [setSearchParams, listFilterDebounceMs]);
 
   return {
     search,

@@ -52,7 +52,7 @@ export const JobListPage: React.FC<{
     return (
       <ErrorState
         error={error}
-        title="Failed to load job list"
+        title="Failed to load requests"
         onRetry={refresh}
       />
     );

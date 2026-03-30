@@ -1,5 +1,6 @@
 import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
+import { Config } from '@/store/_config';
 import type { Library, Novel, Paginated } from '@/types';
 import {
   Col,
@@ -13,15 +14,15 @@ import {
 } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { NovelListItemCard } from '../NovelList/NovelListItemCard';
 import { RemoveLibraryNovelButton } from './RemoveLibraryNovelButton';
-
-const PAGE_SIZE = 12;
 
 export const LibraryNovelList: React.FC<{
   library: Library;
   isOwner: boolean;
 }> = ({ library, isOwner }) => {
+  const pageSize = useSelector(Config.select.libraryNovelListPageSize);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>(true);
   const [refresh, setRefresh] = useState<number>(0);
@@ -38,8 +39,8 @@ export const LibraryNovelList: React.FC<{
           `/api/library/${library.id}/novels`,
           {
             params: {
-              limit: PAGE_SIZE,
-              offset: (page - 1) * PAGE_SIZE,
+              limit: pageSize,
+              offset: (page - 1) * pageSize,
             },
           }
         );
@@ -52,7 +53,7 @@ export const LibraryNovelList: React.FC<{
       }
     };
     loadNovels();
-  }, [library.id, refresh, page]);
+  }, [library.id, refresh, page, pageSize]);
 
   if (loading) {
     return <LoadingState />;
@@ -105,7 +106,7 @@ export const LibraryNovelList: React.FC<{
         <Pagination
           current={page}
           total={total || 0}
-          pageSize={PAGE_SIZE}
+          pageSize={pageSize}
           onChange={(p) => setPage(p)}
           hideOnSinglePage
         />

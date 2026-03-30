@@ -189,14 +189,14 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
         </Space>
       </Card>
 
-      {/* Job Details Section */}
+      {/* Linked request */}
       {job && (
         <Link to={`/job/${job.id}`} style={{ marginTop: 16, display: 'block' }}>
           <JobDetailsCard job={job} hideActions />
         </Link>
       )}
 
-      {/* Job Details Section */}
+      {/* Linked novel */}
       {novel && (
         <Link
           to={`/novel/${novel.id}`}

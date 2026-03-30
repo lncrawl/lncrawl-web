@@ -1,10 +1,12 @@
+import { Config } from '@/store/_config';
 import type { Feedback, Paginated } from '@/types';
+import { FeedbackStatus, FeedbackType } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import axios from 'axios';
 import { debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import { FeedbackStatus, FeedbackType } from '@/types';
 
 interface SearchParams {
   page?: number;
@@ -44,7 +46,9 @@ export function useFeedbackList() {
     return undefined;
   }, [searchParams]);
 
-  const perPage = 25;
+  const perPage = useSelector(Config.select.feedbackListPageSize);
+  const listFetchDelayMs = useSelector(Config.select.listFetchDelayMs);
+  const listFilterDebounceMs = useSelector(Config.select.listFilterDebounceMs);
   const currentPage = useMemo(
     () => parseInt(searchParams.get('page') || '1', 10),
     [searchParams]
@@ -75,9 +79,9 @@ export function useFeedbackList() {
   useEffect(() => {
     const tid = setTimeout(() => {
       fetchFeedback(search, currentPage, perPage, status, type);
-    }, 50);
+    }, listFetchDelayMs);
     return () => clearTimeout(tid);
-  }, [search, currentPage, status, type, refreshId]);
+  }, [search, currentPage, status, type, refreshId, perPage, listFetchDelayMs]);
 
   const refresh = useCallback(() => {
     setRefreshId((v) => v + 1);
@@ -109,8 +113,8 @@ export function useFeedbackList() {
         }
         return next;
       });
-    }, 100);
-  }, [setSearchParams]);
+    }, listFilterDebounceMs);
+  }, [setSearchParams, listFilterDebounceMs]);
 
   return {
     search,

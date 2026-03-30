@@ -1,8 +1,10 @@
+import { Config } from '@/store/_config';
 import type { Paginated, User } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import axios from 'axios';
 import { debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
 interface SearchParams {
@@ -49,7 +51,9 @@ export function useUserList() {
     return undefined;
   }, [searchParams]);
 
-  const perPage = 10;
+  const perPage = useSelector(Config.select.userListPageSize);
+  const listFetchDelayMs = useSelector(Config.select.listFetchDelayMs);
+  const listFilterDebounceMs = useSelector(Config.select.listFilterDebounceMs);
   const currentPage = useMemo(
     () => parseInt(searchParams.get('page') || '1', 10),
     [searchParams]
@@ -79,9 +83,18 @@ export function useUserList() {
       }
     };
 
-    const tid = setTimeout(fetchUsers, 50);
+    const tid = setTimeout(fetchUsers, listFetchDelayMs);
     return () => clearTimeout(tid);
-  }, [search, currentPage, referrerId, isVerified, isActive, refreshId]);
+  }, [
+    search,
+    currentPage,
+    referrerId,
+    isVerified,
+    isActive,
+    refreshId,
+    perPage,
+    listFetchDelayMs,
+  ]);
 
   const refresh = useCallback(() => {
     setRefreshId((v) => v + 1);
@@ -113,8 +126,8 @@ export function useUserList() {
         }
         return next;
       });
-    }, 100);
-  }, [setSearchParams]);
+    }, listFilterDebounceMs);
+  }, [setSearchParams, listFilterDebounceMs]);
 
   return {
     search,

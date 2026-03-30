@@ -76,7 +76,7 @@ export const JobIssueReportButton: React.FC<{
           autoComplete="off"
           labelCol={{ style: { padding: 0 } }}
           initialValues={{
-            subject: `Job Failed: ${job.job_title || job.id}`,
+            subject: `Request failed: ${job.job_title || job.id}`,
             message: [
               job.extra.url && `URL: ${job.extra.url}`,
               job.extra.novel_title && `Novel: ${job.extra.novel_title}`,

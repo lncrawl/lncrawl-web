@@ -1,4 +1,5 @@
 import { store } from '@/store';
+import { Config } from '@/store/_config';
 import { Reader } from '@/store/_reader';
 import { type Job, type ReadChapter } from '@/types';
 import { stringifyError } from '@/utils/errors';
@@ -7,6 +8,7 @@ import axios from 'axios';
 import { LRUCache } from 'lru-cache';
 import { useCallback, useEffect, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { useSelector } from 'react-redux';
 
 const CONTENT_CLEANER_REGEX = /<p>(\s+)|(&nbsp;)+<\/p>(\n|\s|<br\/>)+/gim;
 
@@ -69,6 +71,9 @@ async function fetchJob(
 }
 
 export function useChapterPreloader(chapterId?: string) {
+  const chapterFetchPollIntervalMs = useSelector(
+    Config.select.chapterFetchPollIntervalMs
+  );
   const [refreshId, setRefreshId] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -162,10 +167,16 @@ export function useChapterPreloader(chapterId?: string) {
     } else {
       const iid = setInterval(() => {
         void fetchJob(id, job.id).then(setJob); // update fetch job status.
-      }, 1000);
+      }, chapterFetchPollIntervalMs);
       return () => clearInterval(iid);
     }
-  }, [data?.chapter.id, data?.chapter.is_done, job?.is_done, job?.id]);
+  }, [
+    data?.chapter.id,
+    data?.chapter.is_done,
+    job?.is_done,
+    job?.id,
+    chapterFetchPollIntervalMs,
+  ]);
 
   /// Refresh chapter content
   const refresh = useCallback(() => {

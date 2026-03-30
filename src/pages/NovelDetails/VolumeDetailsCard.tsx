@@ -1,3 +1,4 @@
+import { Config } from '@/store/_config';
 import {
   type Chapter,
   type Job,
@@ -20,6 +21,7 @@ import {
 } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { ChapterListCard } from './ChapterListCard';
 
@@ -29,13 +31,21 @@ export const VolumeDetailsCard: React.FC<{
   history?: ReadHistory;
   hideChapters?: boolean;
 }> = ({ volume, inner, hideChapters, history = {} }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { lg } = Grid.useBreakpoint();
   const [messageApi, contextHolder] = message.useMessage();
+  const defaultChapterPageSize = useSelector(
+    Config.select.volumeChapterListPageSize
+  );
 
   const [page, setPage] = useState<number>(1);
   const [total, setTotal] = useState<number>(0);
-  const [perPage, setPerPage] = useState<number>(10);
+  const [perPage, setPerPage] = useState<number>(defaultChapterPageSize);
+
+  useEffect(() => {
+    setPerPage(defaultChapterPageSize);
+  }, [defaultChapterPageSize]);
   const [loading, setLoading] = useState<boolean>(true);
   const [chapters, setChapters] = useState<Chapter[]>([]);
 
@@ -142,9 +152,10 @@ export const VolumeDetailsCard: React.FC<{
             total={total}
             current={page}
             pageSize={perPage}
-            onChange={(page, perPage) => {
-              setPage(page);
-              setPerPage(perPage);
+            onChange={(nextPage, nextPerPage) => {
+              setPage(nextPage);
+              setPerPage(nextPerPage);
+              dispatch(Config.action.setVolumeChapterListPageSize(nextPerPage));
             }}
             hideOnSinglePage
           />
