@@ -221,6 +221,15 @@ export interface ConfigUpdateRequest {
   value: unknown;
 }
 
+export interface Announcement extends _Base {
+  title: string;
+  message: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  is_active: boolean;
+  version: number;
+  created_by?: string;
+}
+
 export interface Feedback extends _Base {
   user_id: string;
   type: FeedbackType;

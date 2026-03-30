@@ -1,5 +1,6 @@
 import { Divider, Grid, Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
+import { AnnouncementBanner } from '../AnnouncementBanner';
 import { MobileLayoutHeader } from './_header';
 import { MobileNavbar } from './_navbar';
 import { MainLayoutSidebar } from './_sidebar';
@@ -13,6 +14,7 @@ const PageContainer: React.FC<any> = () => {
         transition: 'all 0.2s ease-in-out',
       }}
     >
+      <AnnouncementBanner />
       <Outlet />
     </div>
   );

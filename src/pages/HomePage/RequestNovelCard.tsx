@@ -74,14 +74,13 @@ export const RequestNovelCard: React.FC<any> = () => {
             onInput={onInput}
             style={{
               resize: 'none',
-              fontWeight: '800',
-              fontFamily: "'Roboto Slab', serif",
-              fontSize: lg ? '1.4rem' : '1.25rem',
+              fontFamily: "'Arbutus Slab', serif",
+              fontSize: lg ? '1.65rem' : '1.25rem',
               paddingRight: lg ? 125 : 50,
               outline: 'none',
-              minHeight: 50,
+              minHeight: 55,
               borderRadius: 0,
-              letterSpacing: 1.01,
+              letterSpacing: 1,
             }}
             styles={{
               textarea: {
@@ -103,7 +102,7 @@ export const RequestNovelCard: React.FC<any> = () => {
             icon={<SendOutlined />}
             children={lg ? 'Submit' : ''}
             style={{
-              height: 43,
+              height: 49,
               position: 'absolute',
               right: 3,
               bottom: 4,

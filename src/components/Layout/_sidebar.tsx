@@ -8,6 +8,7 @@ import {
   DeploymentUnitOutlined,
   FileDoneOutlined,
   FolderOpenOutlined,
+  NotificationOutlined,
   QuestionCircleOutlined,
   SettingOutlined,
   TeamOutlined,
@@ -149,6 +150,17 @@ export const MainLayoutSidebar: React.FC<{
                         icon: <TeamOutlined />,
                         className: getClassName(currentPath, '/admin/users'),
                         label: <Link to="/admin/users">Users</Link>,
+                      },
+                      {
+                        key: '/admin/announcements',
+                        icon: <NotificationOutlined />,
+                        className: getClassName(
+                          currentPath,
+                          '/admin/announcements'
+                        ),
+                        label: (
+                          <Link to="/admin/announcements">Announcements</Link>
+                        ),
                       },
                     ],
                   },

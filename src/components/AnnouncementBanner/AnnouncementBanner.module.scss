@@ -1,0 +1,15 @@
+.message {
+  :global(p),
+  :global(ul),
+  :global(ol),
+  :global(li),
+  :global(h1),
+  :global(h2),
+  :global(h3),
+  :global(h4),
+  :global(h5),
+  :global(h6) {
+    margin: 0;
+    padding: 0;
+  }
+}

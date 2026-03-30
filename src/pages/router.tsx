@@ -4,6 +4,11 @@ import { AuthLayout, MainLayout, ReaderLayout } from '@/components/Layout';
 import { lazy, Suspense } from 'react';
 import { Navigate, type RouteObject } from 'react-router-dom';
 
+const AnnouncementListPage = lazy(() =>
+  import('./AnnouncementList').then((m) => ({
+    default: m.AnnouncementListPage,
+  }))
+);
 const FeedbackDetailsPage = lazy(() =>
   import('./FeedbackDetails').then((m) => ({ default: m.FeedbackDetailsPage }))
 );
@@ -182,6 +187,10 @@ export const ADMIN_ROUTES: RouteObject[] = [
       {
         path: 'user/:id',
         element: withSuspense(<UserDetailsPage />),
+      },
+      {
+        path: 'announcements',
+        element: withSuspense(<AnnouncementListPage />),
       },
     ],
   },
