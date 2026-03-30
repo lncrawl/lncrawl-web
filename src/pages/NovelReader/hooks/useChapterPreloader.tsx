@@ -74,6 +74,9 @@ export function useChapterPreloader(chapterId?: string) {
   const chapterFetchPollIntervalMs = useSelector(
     Config.select.chapterFetchPollIntervalMs
   );
+  const readerPreloadNextChapter = useSelector(
+    Config.select.readerPreloadNextChapter
+  );
   const [refreshId, setRefreshId] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -130,16 +133,18 @@ export function useChapterPreloader(chapterId?: string) {
     });
 
     // preload next chapter
-    queueMicrotask(async () => {
-      if (data.next_id) {
-        try {
-          const next = await fetchChapterCached(data.next_id!);
-          if (!next.chapter.is_done) {
-            createFetchJob(next.chapter.id);
-          }
-        } catch {}
-      }
-    });
+    if (readerPreloadNextChapter) {
+      queueMicrotask(async () => {
+        if (data.next_id) {
+          try {
+            const next = await fetchChapterCached(data.next_id!);
+            if (!next.chapter.is_done) {
+              createFetchJob(next.chapter.id);
+            }
+          } catch {}
+        }
+      });
+    }
 
     // TODO: Disabling previous chapter preloading for now.
     // // preload previous chapter
@@ -153,7 +158,7 @@ export function useChapterPreloader(chapterId?: string) {
     //     } catch {}
     //   }
     // });
-  }, [data]);
+  }, [data, readerPreloadNextChapter]);
 
   // Polls fetch job status and refreshes chapter when job is done
   useEffect(() => {

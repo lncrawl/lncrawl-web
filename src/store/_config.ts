@@ -9,7 +9,6 @@ export const CONFIG_LIMITS = {
   pageSize: { min: 5, max: 100 },
   jobListPageSize: { min: 5, max: 50 },
   listPollIntervalMs: { min: 500, max: 120_000 },
-  shortPollIntervalMs: { min: 250, max: 30_000 },
   fetchStaggerMs: { min: 0, max: 500 },
   listFilterDebounceMs: { min: 50, max: 800 },
 } as const;
@@ -28,6 +27,8 @@ export interface ConfigState {
   jobListRefreshIntervalMs: number;
   listFetchDelayMs: number;
   listFilterDebounceMs: number;
+  readerPreloadNextChapter: boolean;
+  readerPreloadPreviousChapter: boolean;
   chapterFetchPollIntervalMs: number;
   jobDetailsPollIntervalMs: number;
   adminRunnerStatusPollIntervalMs: number;
@@ -47,6 +48,8 @@ const buildInitialState = (): ConfigState => ({
   jobListRefreshIntervalMs: 5000,
   listFetchDelayMs: 50,
   listFilterDebounceMs: 100,
+  readerPreloadNextChapter: true,
+  readerPreloadPreviousChapter: false,
   chapterFetchPollIntervalMs: 1000,
   jobDetailsPollIntervalMs: 2000,
   adminRunnerStatusPollIntervalMs: 5000,
@@ -87,12 +90,18 @@ export const ConfigSlice = createSlice({
       const { min, max } = CONFIG_LIMITS.listFilterDebounceMs;
       state.listFilterDebounceMs = clamp(action.payload, min, max);
     },
+    setReaderPreloadPreviousChapter(state, action: PayloadAction<boolean>) {
+      state.readerPreloadPreviousChapter = action.payload;
+    },
+    setReaderPreloadNextChapter(state, action: PayloadAction<boolean>) {
+      state.readerPreloadNextChapter = action.payload;
+    },
     setChapterFetchPollIntervalMs(state, action: PayloadAction<number>) {
-      const { min, max } = CONFIG_LIMITS.shortPollIntervalMs;
+      const { min, max } = CONFIG_LIMITS.listPollIntervalMs;
       state.chapterFetchPollIntervalMs = clamp(action.payload, min, max);
     },
     setJobDetailsPollIntervalMs(state, action: PayloadAction<number>) {
-      const { min, max } = CONFIG_LIMITS.shortPollIntervalMs;
+      const { min, max } = CONFIG_LIMITS.listPollIntervalMs;
       state.jobDetailsPollIntervalMs = clamp(action.payload, min, max);
     },
     setAdminRunnerStatusPollIntervalMs(state, action: PayloadAction<number>) {
@@ -146,7 +155,10 @@ const supportedSourcesPageSize = createSelector(
   selectConfigState,
   (s) => s.supportSourcesPageSize
 );
-const jobListPageSize = createSelector(selectConfigState, (s) => s.jobListPageSize);
+const jobListPageSize = createSelector(
+  selectConfigState,
+  (s) => s.jobListPageSize
+);
 const jobListRefreshIntervalMs = createSelector(
   selectConfigState,
   (s) => s.jobListRefreshIntervalMs
@@ -158,6 +170,14 @@ const listFetchDelayMs = createSelector(
 const listFilterDebounceMs = createSelector(
   selectConfigState,
   (s) => s.listFilterDebounceMs
+);
+const readerPreloadNextChapter = createSelector(
+  selectConfigState,
+  (s) => s.readerPreloadNextChapter
+);
+const readerPreloadPreviousChapter = createSelector(
+  selectConfigState,
+  (s) => s.readerPreloadPreviousChapter
 );
 const chapterFetchPollIntervalMs = createSelector(
   selectConfigState,
@@ -171,7 +191,10 @@ const adminRunnerStatusPollIntervalMs = createSelector(
   selectConfigState,
   (s) => s.adminRunnerStatusPollIntervalMs
 );
-const userListPageSize = createSelector(selectConfigState, (s) => s.userListPageSize);
+const userListPageSize = createSelector(
+  selectConfigState,
+  (s) => s.userListPageSize
+);
 const feedbackListPageSize = createSelector(
   selectConfigState,
   (s) => s.feedbackListPageSize
@@ -209,6 +232,8 @@ export const Config = {
     jobListRefreshIntervalMs,
     listFetchDelayMs,
     listFilterDebounceMs,
+    readerPreloadNextChapter,
+    readerPreloadPreviousChapter,
     chapterFetchPollIntervalMs,
     jobDetailsPollIntervalMs,
     adminRunnerStatusPollIntervalMs,
@@ -228,16 +253,33 @@ export const Config = {
 //
 const blacklist: Array<keyof ConfigState> = [];
 
+const REMOVED_CONFIG_KEYS = [
+  'httpRequestTimeoutMs',
+  'readerChapterCacheMax',
+  'jobDetailsApiCacheTtlMs',
+  'sourceFilterDebounceMs',
+] as const;
+
+function mergePersistedConfig(state: unknown): ConfigState {
+  const raw =
+    state && typeof state === 'object'
+      ? { ...(state as Record<string, unknown>) }
+      : {};
+  for (const k of REMOVED_CONFIG_KEYS) {
+    delete raw[k];
+  }
+  return { ...buildInitialState(), ...(raw as Partial<ConfigState>) };
+}
+
 const configMigrations = {
-  2: (state: unknown): ConfigState => ({
-    ...buildInitialState(),
-    ...(state && typeof state === 'object' ? (state as Partial<ConfigState>) : {}),
-  }),
+  2: mergePersistedConfig,
+  3: mergePersistedConfig,
+  4: mergePersistedConfig,
 };
 
 export const configPersistConfig: PersistConfig<ConfigState> = {
   key: 'config',
-  version: 2,
+  version: 4,
   storage,
   blacklist,
   migrate: createMigrate(configMigrations as any, { debug: false }),

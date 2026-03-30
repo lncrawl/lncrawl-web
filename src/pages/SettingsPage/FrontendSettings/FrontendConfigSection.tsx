@@ -1,7 +1,6 @@
-import { ConfigDescription } from '@/pages/SettingsPage/ApplicationSettings/ConfigDescription';
 import { Flex, Typography } from 'antd';
 import cx from 'classnames';
-import appStyles from '../ApplicationSettings/ApplicationSettings.module.scss';
+import styles from '../ApplicationSettings/ApplicationSettings.module.scss';
 
 export const FrontendConfigSection: React.FC<{
   label: string;
@@ -11,8 +10,8 @@ export const FrontendConfigSection: React.FC<{
 }> = ({ label, description, showSeparator = false, children }) => {
   return (
     <div
-      className={cx(appStyles.row, {
-        [appStyles.rowWithSeparator]: showSeparator,
+      className={cx(styles.row, {
+        [styles.rowWithSeparator]: showSeparator,
       })}
     >
       <Flex vertical gap={8}>
@@ -38,7 +37,9 @@ export const FrontendConfigSection: React.FC<{
           </div>
         </Flex>
 
-        {description ? <ConfigDescription text={description} /> : null}
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          {description}
+        </Typography.Text>
       </Flex>
     </div>
   );

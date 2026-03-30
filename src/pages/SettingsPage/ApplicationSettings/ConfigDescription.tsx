@@ -1,7 +1,9 @@
 import ReactMarkdown from 'react-markdown';
 import styles from './ApplicationSettings.module.scss';
 
-export function ConfigDescription({ text }: { text: string }) {
+export const ConfigDescription: React.FC<{
+  text: string;
+}> = ({ text }) => {
   const trimmed = text?.trim();
   if (!trimmed) {
     return null;
@@ -11,4 +13,4 @@ export function ConfigDescription({ text }: { text: string }) {
       <ReactMarkdown>{trimmed}</ReactMarkdown>
     </div>
   );
-}
+};

@@ -7,9 +7,11 @@ import {
   SortDescendingOutlined,
   TranslationOutlined,
 } from '@ant-design/icons';
+import { Config } from '@/store/_config';
 import { Button, Flex, Input, Select, Space } from 'antd';
 import { isEqual, sortedUniqBy } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { getLanguageLabel } from './utils';
 
 type SortBy = 'domain' | 'total_novels' | 'total_commits' | 'version';
@@ -48,13 +50,14 @@ export const SupportedSourceFilter: React.FC<{
   languages: string[];
 }> = ({ onChange, languages }) => {
   const [filter, setFilter] = useState(defaultSourceFilters);
+  const listFilterDebounceMs = useSelector(Config.select.listFilterDebounceMs);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       onChange(filter);
-    }, 50);
+    }, listFilterDebounceMs);
     return () => clearTimeout(timeout);
-  }, [filter, onChange]);
+  }, [filter, onChange, listFilterDebounceMs]);
 
   const sortByOptions = [
     { value: 'domain', label: 'Domain' },

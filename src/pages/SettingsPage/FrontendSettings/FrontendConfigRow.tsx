@@ -1,24 +1,10 @@
 import { Auth } from '@/store/_auth';
 import type { ConfigState } from '@/store/_config';
-import type { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { Col, Grid, Row } from 'antd';
+import { Col, Grid, InputNumber, Row, Switch } from 'antd';
 import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FrontendConfigSection } from './FrontendConfigSection';
-import { FrontendNumberInput } from './FrontendNumberInput';
-
-export type FrontendConfigItem = {
-  key: string;
-  label: string;
-  description: string;
-  min: number;
-  max: number;
-  step?: number;
-  suffix?: string;
-  get: (s: ConfigState) => number;
-  set: ActionCreatorWithPayload<number, string>;
-  access?: (isLocal: boolean, isAdmin: boolean) => boolean;
-};
+import { isBooleanItem, isNumberItem, type FrontendConfigItem } from './types';
 
 export const FrontendConfigRow: React.FC<{
   rows: FrontendConfigItem[];
@@ -42,14 +28,24 @@ export const FrontendConfigRow: React.FC<{
             description={row.description}
             showSeparator={index >= (screens.xl ? 2 : 1)}
           >
-            <FrontendNumberInput
-              value={row.get(state)}
-              onChange={(v) => v != null && dispatch(row.set(v))}
-              min={row.min}
-              max={row.max}
-              step={row.step}
-              suffix={row.suffix}
-            />
+            {isBooleanItem(row) ? (
+              <Switch
+                checked={row.get(state)}
+                onChange={(checked) => dispatch(row.set(checked))}
+              />
+            ) : isNumberItem(row) ? (
+              <InputNumber
+                controls
+                value={row.get(state)}
+                onChange={(v) => v != null && dispatch(row.set(v))}
+                min={row.min}
+                max={row.max}
+                step={row.step}
+                changeOnWheel={false}
+                addonAfter={row.suffix}
+                style={{ width: '100%', maxWidth: 360 }}
+              />
+            ) : null}
           </FrontendConfigSection>
         </Col>
       ))}

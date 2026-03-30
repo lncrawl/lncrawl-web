@@ -3,6 +3,7 @@ import { Config, CONFIG_LIMITS } from '@/store/_config';
 import {
   BookOutlined,
   ClockCircleOutlined,
+  ExperimentOutlined,
   SearchOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
@@ -18,14 +19,13 @@ import {
 } from 'antd';
 import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import appStyles from '../ApplicationSettings/ApplicationSettings.module.scss';
-import {
-  type FrontendConfigItem,
-  FrontendConfigRow,
-} from './FrontendConfigRow';
+import styles from '../ApplicationSettings/ApplicationSettings.module.scss';
+import { FrontendConfigRow } from './FrontendConfigRow';
+import type { FrontendConfigItem } from './types';
 
 const LIST_PAGE_ROWS: FrontendConfigItem[] = [
   {
+    kind: 'number',
     key: 'requests',
     label: 'Requests',
     description:
@@ -35,6 +35,7 @@ const LIST_PAGE_ROWS: FrontendConfigItem[] = [
     set: Config.action.setJobListPageSize,
   },
   {
+    kind: 'number',
     key: 'users',
     label: 'Users',
     description:
@@ -45,15 +46,16 @@ const LIST_PAGE_ROWS: FrontendConfigItem[] = [
     access: (isLocal, isAdmin) => !isLocal && isAdmin,
   },
   {
+    kind: 'number',
     key: 'feedback',
-    label: 'Feedback list',
-    description:
-      'How many items you see on one page in the Feedback inbox.',
+    label: 'Feedbacks',
+    description: 'How many items you see on one page in the Feedback inbox.',
     ...CONFIG_LIMITS.pageSize,
     get: (s) => s.feedbackListPageSize,
     set: Config.action.setFeedbackListPageSize,
   },
   {
+    kind: 'number',
     key: 'libraries',
     label: 'Libraries',
     description:
@@ -63,6 +65,7 @@ const LIST_PAGE_ROWS: FrontendConfigItem[] = [
     set: Config.action.setLibraryListPageSize,
   },
   {
+    kind: 'number',
     key: 'library-novels',
     label: 'Library novels',
     description:
@@ -72,6 +75,7 @@ const LIST_PAGE_ROWS: FrontendConfigItem[] = [
     set: Config.action.setLibraryNovelListPageSize,
   },
   {
+    kind: 'number',
     key: 'volume-chapters',
     label: 'Volume chapters',
     description:
@@ -81,6 +85,7 @@ const LIST_PAGE_ROWS: FrontendConfigItem[] = [
     set: Config.action.setVolumeChapterListPageSize,
   },
   {
+    kind: 'number',
     key: 'sources',
     label: 'Supported sources',
     description:
@@ -93,6 +98,7 @@ const LIST_PAGE_ROWS: FrontendConfigItem[] = [
 
 const NOVEL_LIST_PAGE_ROWS: FrontendConfigItem[] = [
   {
+    kind: 'number',
     key: 'novel-wide',
     label: 'Very wide window',
     description:
@@ -102,6 +108,7 @@ const NOVEL_LIST_PAGE_ROWS: FrontendConfigItem[] = [
     set: Config.action.setNovelListPageSizeXl,
   },
   {
+    kind: 'number',
     key: 'novel-medium',
     label: 'Typical desktop window',
     description:
@@ -111,6 +118,7 @@ const NOVEL_LIST_PAGE_ROWS: FrontendConfigItem[] = [
     set: Config.action.setNovelListPageSizeLg,
   },
   {
+    kind: 'number',
     key: 'novel-narrow',
     label: 'Narrow window',
     description:
@@ -123,6 +131,7 @@ const NOVEL_LIST_PAGE_ROWS: FrontendConfigItem[] = [
 
 const POLLING_ROWS: FrontendConfigItem[] = [
   {
+    kind: 'number',
     key: 'request-list-refresh',
     label: 'Request list auto-refresh',
     description:
@@ -134,28 +143,31 @@ const POLLING_ROWS: FrontendConfigItem[] = [
     set: Config.action.setJobListRefreshIntervalMs,
   },
   {
+    kind: 'number',
     key: 'chapter-poll',
     label: 'While a chapter is loading',
     description:
       'In the reader, how often we check whether the chapter text is ready yet.',
-    step: 250,
+    step: 500,
     suffix: 'ms',
-    ...CONFIG_LIMITS.shortPollIntervalMs,
+    ...CONFIG_LIMITS.listPollIntervalMs,
     get: (s) => s.chapterFetchPollIntervalMs,
     set: Config.action.setChapterFetchPollIntervalMs,
   },
   {
+    kind: 'number',
     key: 'request-details-poll',
     label: 'Request details page',
     description:
       'On a Request details page, how often the screen checks for progress while the Request is still in progress.',
-    step: 250,
+    step: 500,
     suffix: 'ms',
-    ...CONFIG_LIMITS.shortPollIntervalMs,
+    ...CONFIG_LIMITS.listPollIntervalMs,
     get: (s) => s.jobDetailsPollIntervalMs,
     set: Config.action.setJobDetailsPollIntervalMs,
   },
   {
+    kind: 'number',
     key: 'runner-status',
     label: 'Admin runner status',
     description:
@@ -169,12 +181,13 @@ const POLLING_ROWS: FrontendConfigItem[] = [
   },
 ];
 
-const TIMING_ROWS: FrontendConfigItem[] = [
+const LIST_TIMING_ROWS: FrontendConfigItem[] = [
   {
+    kind: 'number',
     key: 'fetch-delay',
     label: 'Brief pause before loading lists',
     description:
-      'After the address or filters change, wait this long before loading the list again. Slightly smoother if you click around quickly.',
+      'After the address or filters change, wait this long before loading list data again (Novels, Requests, Feedback, Users). Slightly smoother if you click around quickly.',
     step: 10,
     suffix: 'ms',
     ...CONFIG_LIMITS.fetchStaggerMs,
@@ -182,15 +195,37 @@ const TIMING_ROWS: FrontendConfigItem[] = [
     set: Config.action.setListFetchDelayMs,
   },
   {
+    kind: 'number',
     key: 'debounce',
     label: 'Search and filters',
     description:
-      'After you stop typing, wait this long before the list catches up and the address bar reflects your search or filters.',
+      'After you stop typing or change filters, wait this long before lists and tables update (Novels, Requests, Feedback, Users, and Supported sources).',
     step: 25,
     suffix: 'ms',
     ...CONFIG_LIMITS.listFilterDebounceMs,
     get: (s) => s.listFilterDebounceMs,
     set: Config.action.setListFilterDebounceMs,
+  },
+];
+
+const ADVANCED_ROWS: FrontendConfigItem[] = [
+  {
+    kind: 'boolean',
+    key: 'reader-preload-previous',
+    label: 'Preload previous chapter',
+    description:
+      'When on, the reader may fetch the previous chapter in the background so flipping backward feels faster.',
+    get: (s) => s.readerPreloadPreviousChapter,
+    set: Config.action.setReaderPreloadPreviousChapter,
+  },
+  {
+    kind: 'boolean',
+    key: 'reader-preload-next',
+    label: 'Preload next chapter',
+    description:
+      'When on, the reader may fetch the next chapter in the background so flipping forward feels faster.',
+    get: (s) => s.readerPreloadNextChapter,
+    set: Config.action.setReaderPreloadNextChapter,
   },
 ];
 
@@ -269,7 +304,25 @@ export const FrontendSettings: React.FC = () => {
         ),
         children: (
           <FrontendConfigRow
-            rows={TIMING_ROWS}
+            rows={LIST_TIMING_ROWS}
+            state={state}
+            screens={screens}
+          />
+        ),
+      },
+      {
+        key: 'advanced',
+        label: (
+          <Space>
+            <ExperimentOutlined />
+            <Typography.Text strong type="success">
+              Advanced
+            </Typography.Text>
+          </Space>
+        ),
+        children: (
+          <FrontendConfigRow
+            rows={ADVANCED_ROWS}
             state={state}
             screens={screens}
           />
@@ -285,15 +338,16 @@ export const FrontendSettings: React.FC = () => {
       <Collapse
         accordion
         bordered={false}
-        expandIconPlacement="end"
-        className={appStyles.sectionAccordion}
-        activeKey={activeKey}
-        onChange={(key) =>
-          setActiveKey(
-            Array.isArray(key) ? (key[0] ?? 'lists') : (key ?? 'lists')
-          )
-        }
         items={items}
+        expandIconPlacement="end"
+        className={styles.sectionAccordion}
+        activeKey={activeKey}
+        onChange={(key) => {
+          const newActiveKey = Array.isArray(key)
+            ? (key[0] ?? 'lists')
+            : (key ?? 'lists');
+          setActiveKey(newActiveKey);
+        }}
       />
 
       <Flex align="flex-start" justify="space-between" gap={12} wrap="wrap">
