@@ -28,7 +28,7 @@ export const AnnouncementListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [messageApi]);
 
   useEffect(() => {
     fetchAll();

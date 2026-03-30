@@ -146,12 +146,6 @@ export const MainLayoutSidebar: React.FC<{
                     label: 'Administration',
                     children: [
                       {
-                        key: '/admin/users',
-                        icon: <TeamOutlined />,
-                        className: getClassName(currentPath, '/admin/users'),
-                        label: <Link to="/admin/users">Users</Link>,
-                      },
-                      {
                         key: '/admin/announcements',
                         icon: <NotificationOutlined />,
                         className: getClassName(
@@ -161,6 +155,12 @@ export const MainLayoutSidebar: React.FC<{
                         label: (
                           <Link to="/admin/announcements">Announcements</Link>
                         ),
+                      },
+                      {
+                        key: '/admin/users',
+                        icon: <TeamOutlined />,
+                        className: getClassName(currentPath, '/admin/users'),
+                        label: <Link to="/admin/users">Users</Link>,
                       },
                     ],
                   },
