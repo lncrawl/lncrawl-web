@@ -69,7 +69,7 @@ export const ConfigValueControl: React.FC<{
       placeholder="Enter any text value"
       autoSize={{ minRows: 3, maxRows: 14 }}
       style={{
-        fontFamily: 'Roboto Mono, monospace',
+        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
         fontSize: 12,
       }}
     />

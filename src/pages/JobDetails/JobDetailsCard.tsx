@@ -32,7 +32,7 @@ export const JobDetailsCard: React.FC<{
         style={{
           margin: 0,
           marginBottom: 8,
-          fontFamily: "'Roboto Slab', serif",
+          fontFamily: "'IBM Plex Serif', Georgia, serif",
         }}
       >
         {job.job_title || `Request ${job.id}`}

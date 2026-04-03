@@ -6,6 +6,8 @@ export const appTheme: ThemeConfig = {
   token: {
     colorPrimary: '#1d6a3c',
     colorBgLayout: '#1c1c1c',
+    fontFamily:
+      "'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
   },
   components: {
     Tag: {

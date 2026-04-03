@@ -74,7 +74,7 @@ export const RequestNovelCard: React.FC<any> = () => {
             onInput={onInput}
             style={{
               resize: 'none',
-              fontFamily: "'Arbutus Slab', serif",
+              fontFamily: "'IBM Plex Serif', Georgia, serif",
               fontSize: lg ? '1.65rem' : '1.25rem',
               paddingRight: lg ? 125 : 50,
               outline: 'none',
