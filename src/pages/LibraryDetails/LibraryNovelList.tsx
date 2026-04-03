@@ -1,12 +1,16 @@
 import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
 import { Config } from '@/store/_config';
-import type { Library, Novel, Paginated } from '@/types';
+import type { Job, Library, Novel, Paginated } from '@/types';
+import { stringifyError } from '@/utils/errors';
+import { ReloadOutlined } from '@ant-design/icons';
 import {
+  Button,
   Col,
   Divider,
   Empty,
   Flex,
+  message,
   Pagination,
   Row,
   Space,
@@ -15,6 +19,7 @@ import {
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { NovelListItemCard } from '../NovelList/NovelListItemCard';
 import { RemoveLibraryNovelButton } from './RemoveLibraryNovelButton';
 
@@ -22,6 +27,7 @@ export const LibraryNovelList: React.FC<{
   library: Library;
   isOwner: boolean;
 }> = ({ library, isOwner }) => {
+  const navigate = useNavigate();
   const pageSize = useSelector(Config.select.libraryNovelListPageSize);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>(true);
@@ -55,6 +61,20 @@ export const LibraryNovelList: React.FC<{
     loadNovels();
   }, [library.id, refresh, page, pageSize]);
 
+  const handleRefreshAll = async () => {
+    try {
+      const { data: job } = await axios.post<Job>(
+        '/api/job/create/fetch-novels',
+        {
+          urls: novels.map((novel) => novel.url),
+        }
+      );
+      navigate(`/job/${job.id}`);
+    } catch (err) {
+      message.error(stringifyError(err));
+    }
+  };
+
   if (loading) {
     return <LoadingState />;
   }
@@ -71,9 +91,20 @@ export const LibraryNovelList: React.FC<{
 
   return (
     <>
-      <Flex align="center" justify="space-between">
-        <Typography.Title level={4}>📚 Novels</Typography.Title>
-        <Typography.Text type="secondary">{total || 0} total</Typography.Text>
+      <Flex align="center" justify="space-between" style={{ marginTop: 15 }}>
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          📚 Novels{' '}
+          <sup>
+            <Typography.Text type="secondary">
+              ({total || 0} total)
+            </Typography.Text>
+          </sup>
+        </Typography.Title>
+        {total > 0 && (
+          <Button icon={<ReloadOutlined />} onClick={handleRefreshAll}>
+            Refresh All
+          </Button>
+        )}
       </Flex>
 
       <Divider size="small" />
@@ -82,7 +113,7 @@ export const LibraryNovelList: React.FC<{
         {novels.length ? (
           <Row gutter={[12, 12]}>
             {novels.map((novel) => (
-              <Col key={novel.id} xs={12} sm={12} md={8} lg={6} xl={4}>
+              <Col key={novel.id} xs={12} sm={8} lg={6} xl={4}>
                 <div style={{ position: 'relative' }}>
                   {isOwner && (
                     <RemoveLibraryNovelButton

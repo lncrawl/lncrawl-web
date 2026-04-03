@@ -9,6 +9,7 @@ const PageContainer: React.FC<any> = () => {
   return (
     <div
       style={{
+        height: '100%',
         maxWidth: 1200,
         margin: '0 auto',
         transition: 'all 0.2s ease-in-out',
