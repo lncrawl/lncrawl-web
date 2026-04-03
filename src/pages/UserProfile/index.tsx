@@ -2,7 +2,7 @@ import { UserAvatar } from '@/components/Tags/UserAvatar';
 import { UserTierTag } from '@/components/Tags/UserTierTag';
 import { store } from '@/store';
 import { Auth } from '@/store/_auth';
-import type { User } from '@/types';
+import { UserRole, type User } from '@/types';
 import { formatDate, formatFromNow } from '@/utils/time';
 import {
   CalendarOutlined,
@@ -16,6 +16,7 @@ import { Descriptions, Divider, Grid, Space, Typography } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { ProfileDeleteButton } from './ProfileDeleteButton';
 import { ProfileNameChangeButton } from './ProfileNameChangeButton';
 import { ProfilePasswordChangeButton } from './ProfilePasswordChangeButton';
 
@@ -142,6 +143,8 @@ export const UserProfilePage: React.FC<any> = () => {
           </Typography.Text>
         </Descriptions.Item>
       </Descriptions>
+
+      {user.role !== UserRole.ADMIN && <ProfileDeleteButton />}
     </div>
   );
 };
