@@ -74,13 +74,13 @@ export const RequestNovelCard: React.FC<any> = () => {
             onInput={onInput}
             style={{
               resize: 'none',
-              fontFamily: "'IBM Plex Serif', Georgia, serif",
-              fontSize: lg ? '1.65rem' : '1.25rem',
-              paddingRight: lg ? 125 : 50,
               outline: 'none',
-              minHeight: 55,
               borderRadius: 0,
               letterSpacing: 1,
+              fontFamily: "'IBM Plex Serif', Georgia, serif",
+              fontSize: lg ? '1.65rem' : '1.25rem',
+              paddingRight: lg ? 125 : 60,
+              minHeight: lg ? 55 : 45,
             }}
             styles={{
               textarea: {
@@ -102,12 +102,12 @@ export const RequestNovelCard: React.FC<any> = () => {
             icon={<SendOutlined />}
             children={lg ? 'Submit' : ''}
             style={{
-              height: 49,
               position: 'absolute',
               right: 3,
               bottom: 4,
               zIndex: 2,
-              padding: lg ? 18 : '0 15px',
+              height: lg ? 49 : 40,
+              padding: lg ? 18 : '0 24px',
               fontSize: lg ? '1.25rem' : '1rem',
               borderRadius: 0,
             }}
