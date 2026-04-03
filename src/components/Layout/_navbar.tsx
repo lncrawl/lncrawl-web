@@ -2,9 +2,9 @@ import {
   BookOutlined,
   CloseOutlined,
   DeploymentUnitOutlined,
-  FileDoneOutlined,
   FolderOpenOutlined,
   MenuFoldOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import { Button, Drawer, Flex, theme } from 'antd';
 import { useEffect, useState } from 'react';
@@ -103,10 +103,10 @@ export const MobileNavbar: React.FC<{
           onClick={() => handleNavClick('/libraries')}
         />
         <NavbarButton
-          label="Crawlers"
-          icon={<FileDoneOutlined />}
-          active={currentPath === '/meta/sources'}
-          onClick={() => handleNavClick('/meta/sources')}
+          label="Account"
+          icon={<UserOutlined />}
+          active={currentPath === '/profile'}
+          onClick={() => handleNavClick('/profile')}
         />
         <NavbarButton
           label="More"

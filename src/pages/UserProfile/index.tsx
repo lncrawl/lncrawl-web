@@ -50,7 +50,7 @@ export const UserProfilePage: React.FC<any> = () => {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       <Typography.Title level={2}>
-        <UserOutlined /> Profile
+        <UserOutlined /> Account
       </Typography.Title>
 
       <Descriptions

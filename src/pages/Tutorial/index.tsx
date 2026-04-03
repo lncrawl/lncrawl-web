@@ -421,14 +421,14 @@ export const TutorialPage: React.FC<any> = () => {
       : [
           {
             key: 'profile',
-            label: 'Profile and Email Verification',
+            label: 'Account and Email Verification',
             children: (
               <div>
                 <Title level={4} style={{ marginTop: 0 }}>
-                  <UserOutlined /> Profile Page
+                  <UserOutlined /> Account Page
                 </Title>
                 <Paragraph>
-                  Your <Link to="/profile">Profile page</Link> displays your
+                  Your <Link to="/profile">Account page</Link> displays your
                   account information: name (editable), email, role, tier, and
                   join date. You can also manage your password and generate API
                   tokens here.

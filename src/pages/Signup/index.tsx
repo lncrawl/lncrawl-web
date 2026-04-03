@@ -98,7 +98,7 @@ export const SignupPage: React.FC<any> = () => {
 
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
         Registration is now referral-only. If you want to refer someone, you can
-        find your referral token on your Profile page.
+        find your referral token on your Account page.
       </Typography.Text>
 
       <Form.Item

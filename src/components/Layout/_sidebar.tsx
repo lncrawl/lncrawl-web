@@ -120,7 +120,7 @@ export const MainLayoutSidebar: React.FC<{
                     key: '/profile',
                     icon: <UserOutlined />,
                     className: getClassName(currentPath, '/profile'),
-                    label: <Link to="/profile">Profile</Link>,
+                    label: <Link to="/profile">Account</Link>,
                   },
                 ]),
             {
