@@ -11,7 +11,7 @@ export const JobFilterBox: React.FC<JobListHook> = ({
   loading: refreshSpinning,
   requiresRefresh,
 }) => {
-  const { lg } = Grid.useBreakpoint();
+  const screen = Grid.useBreakpoint();
 
   const handleRefresh = () => {
     if (refreshSpinning) return;
@@ -20,11 +20,15 @@ export const JobFilterBox: React.FC<JobListHook> = ({
 
   return (
     <Flex justify="space-between" align="center" wrap gap={5}>
-      <Flex align="center" gap={5} style={lg ? { flex: 1 } : { width: '100%' }}>
+      <Flex
+        align="center"
+        gap={5}
+        style={screen.lg ? { flex: 1 } : { width: '100%' }}
+      >
         <Typography.Text
           style={{
             textAlign: 'right',
-            width: lg ? undefined : 50,
+            width: screen.lg ? undefined : 50,
           }}
         >
           Status:
@@ -39,13 +43,17 @@ export const JobFilterBox: React.FC<JobListHook> = ({
         />
       </Flex>
 
-      {lg && <Divider vertical />}
+      {screen.lg && <Divider vertical />}
 
-      <Flex align="center" gap={5} style={lg ? { flex: 1 } : { width: '100%' }}>
+      <Flex
+        align="center"
+        gap={5}
+        style={screen.lg ? { flex: 1 } : { width: '100%' }}
+      >
         <Typography.Text
           style={{
             textAlign: 'right',
-            width: lg ? undefined : 50,
+            width: screen.lg ? undefined : 50,
           }}
         >
           Type:
@@ -60,10 +68,11 @@ export const JobFilterBox: React.FC<JobListHook> = ({
         />
       </Flex>
 
-      {lg && <div style={{ flex: 1 }} />}
+      {screen.lg && <div style={{ flex: 1 }} />}
 
       {requiresRefresh && (
         <Button
+          block={!screen.lg}
           type="default"
           onClick={handleRefresh}
           icon={<SyncOutlined spin={!!refreshSpinning} />}
