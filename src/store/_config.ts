@@ -47,20 +47,20 @@ const buildInitialState = (): ConfigState => ({
   jobListPageSize: 10,
   jobListRefreshIntervalMs: 5000,
   listFetchDelayMs: 50,
-  listFilterDebounceMs: 100,
+  listFilterDebounceMs: 300,
   readerPreloadNextChapter: true,
   readerPreloadPreviousChapter: false,
   chapterFetchPollIntervalMs: 1000,
-  jobDetailsPollIntervalMs: 2000,
+  jobDetailsPollIntervalMs: 2500,
   adminRunnerStatusPollIntervalMs: 5000,
   userListPageSize: 10,
-  feedbackListPageSize: 25,
-  libraryListPageSize: 18,
+  feedbackListPageSize: 15,
+  libraryListPageSize: 12,
   libraryNovelListPageSize: 12,
   volumeChapterListPageSize: 10,
-  novelListPageSizeXl: 48,
-  novelListPageSizeLg: 32,
-  novelListPageSizeSm: 24,
+  novelListPageSizeXl: 24,
+  novelListPageSizeLg: 16,
+  novelListPageSizeSm: 12,
 });
 
 //
@@ -279,7 +279,7 @@ const configMigrations = {
 
 export const configPersistConfig: PersistConfig<ConfigState> = {
   key: 'config',
-  version: 4,
+  version: 5,
   storage,
   blacklist,
   migrate: createMigrate(configMigrations as any, { debug: false }),
