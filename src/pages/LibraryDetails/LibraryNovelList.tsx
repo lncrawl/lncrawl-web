@@ -1,5 +1,6 @@
 import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
+import { Auth } from '@/store/_auth';
 import { Config } from '@/store/_config';
 import type { Job, Library, Novel, Paginated } from '@/types';
 import { stringifyError } from '@/utils/errors';
@@ -28,6 +29,8 @@ export const LibraryNovelList: React.FC<{
   isOwner: boolean;
 }> = ({ library, isOwner }) => {
   const navigate = useNavigate();
+  const isAdminUser= useSelector(Auth.select.isAdmin);
+  const isLocalUser = useSelector(Auth.select.isLocal);
   const pageSize = useSelector(Config.select.libraryNovelListPageSize);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>(true);
@@ -67,6 +70,7 @@ export const LibraryNovelList: React.FC<{
         '/api/job/create/fetch-novels',
         {
           urls: novels.map((novel) => novel.url),
+          full: isLocalUser || isAdminUser
         }
       );
       navigate(`/job/${job.id}`);
