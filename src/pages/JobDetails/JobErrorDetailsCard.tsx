@@ -5,7 +5,10 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-const CAPTCHA_FAILURES = ['HTTPError: 403 Client Error: Forbidden for url'];
+const CAPTCHA_FAILURES = [
+  'HTTPError: 403 Client Error: Forbidden for url',
+  'RuntimeError: Browser is disabled',
+];
 
 export const JobErrorDetailsCard: React.FC<{ job: Job }> = ({ job }) => {
   const isAdmin = useSelector(Auth.select.isAdmin);
