@@ -1,5 +1,5 @@
 /** Dev server default; override with `VITE_API_BASE_URL` in `.env.development.local`. */
-const DEV_DEFAULT_API = 'http://localhost:8080';
+const DEV_DEFAULT_API = 'http://localhost:8181';
 
 export const API_BASE_URL = import.meta.env.PROD
   ? ''

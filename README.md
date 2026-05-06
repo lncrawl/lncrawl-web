@@ -31,12 +31,12 @@ Build output is written to **`dist/`** by default (see `vite.config.ts` for `out
 
 ## Configuration
 
-In development, the app talks to the API at **`http://localhost:8080`**.
+In development, the app talks to the API at **`http://localhost:8181`**.
 Start the backend there or adjust the base URL.
 
 API base URL is set in [src/config.ts](src/config.ts):
 
-- **Development** — `http://localhost:8080`
+- **Development** — `http://localhost:8181`
 - **Production** — empty string (same origin; serve the built app from the same host as the API)
 
 ## Tech stack
