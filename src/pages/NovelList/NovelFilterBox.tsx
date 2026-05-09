@@ -1,22 +1,29 @@
 import { Favicon } from '@/components/Favicon';
-import { Flex, Input, message, Select, Space } from 'antd';
+import {
+  AutoComplete,
+  Flex,
+  Input,
+  message,
+  Select,
+  Space,
+  Typography,
+} from 'antd';
 import axios from 'axios';
-import { uniqBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
-import type { SourceItem } from '../../types';
 import { type NovelListHook } from './hooks';
 
 export const NovelFilterBox: React.FC<
   Pick<NovelListHook, 'search' | 'domain' | 'updateParams'>
 > = ({ search: initialSearch, domain: initialDomain, updateParams }) => {
   const [loading, setLoading] = useState(false);
-  const [sources, setSources] = useState<SourceItem[]>([]);
+  const [sources, setSources] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const loadSources = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get<SourceItem[]>('/api/novel/sources');
+        const { data } =
+          await axios.get<Record<string, number>>('/api/novel/domains');
         setSources(data);
       } catch {
         message.error('Failed to load sources');
@@ -28,31 +35,37 @@ export const NovelFilterBox: React.FC<
   }, []);
 
   const sourceOptions = useMemo(() => {
-    return uniqBy(sources, 'domain').map((source) => ({
-      value: source.domain,
-      label: (
-        <Space>
-          <Favicon url={source.url} /> {source.domain}
-        </Space>
-      ),
-    }));
+    return Object.entries(sources)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([domain, total]) => ({
+        value: domain,
+        label: (
+          <Space size="small">
+            <Favicon url={`https://${domain}`} />
+            {domain}
+            <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+              ({total} novels)
+            </Typography.Text>
+          </Space>
+        ),
+      }));
   }, [sources]);
 
   return (
     <Flex align="center" justify="space-between" gap="8px" wrap>
       {/* Domain Select */}
       <Select
-        virtual={false}
         loading={loading}
-        defaultValue={initialDomain || undefined}
-        onChange={(value: string) =>
-          updateParams({ domain: value || '', page: 1 })
-        }
-        placeholder="Select a domain"
-        allowClear
-        size="large"
         options={sourceOptions}
+        defaultValue={initialDomain || null}
+        onChange={(value) => updateParams({ domain: value || '', page: 1 })}
+        placeholder="Select a domain"
+        size="large"
+        allowClear
+        virtual={false}
         style={{ flex: 1, minWidth: 250 }}
+        labelRender={({ value }) => value}
+        showSearch={{ autoClearSearchValue: true }}
       />
 
       {/* Search Input */}

@@ -81,7 +81,6 @@ export const SupportedSourceFilter: React.FC<{
         onClear={() => setFilter({ ...filter, search: '' })}
         onSearch={(search) => setFilter({ ...filter, search })}
         allowClear
-        prefix={<SearchOutlined />}
         placeholder="Search by URL"
         style={{ flex: 2, minWidth: 250 }}
       />

@@ -107,35 +107,18 @@ export function useSourceList() {
   );
 
   useEffect(() => {
-    const fetchNovelSources = async () => {
-      const res = await axios.get<SourceItem[]>('/api/novel/sources');
-      const novelSources = new Map<string, number>();
-      for (const source of res.data) {
-        novelSources.set(source.domain, source.total_novels);
-      }
-      return novelSources;
-    };
-
-    const fetchSourceList = async () => {
+    async function fetch() {
+      setError(undefined);
       try {
-        setError(undefined);
-        const novels = await fetchNovelSources();
-        const res = await axios.get<SourceItem[]>(
-          '/api/meta/supported-sources'
-        );
-        const data = res.data.map((source) => ({
-          ...source,
-          total_novels: novels.get(source.domain) ?? 0,
-        }));
-        setData(data);
+        const res = await axios.get<SourceItem[]>('/api/sources');
+        setData(res.data);
       } catch (err) {
         setError(stringifyError(err));
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchSourceList();
+    }
+    queueMicrotask(fetch);
   }, [refreshId]);
 
   const refresh = useCallback(() => {

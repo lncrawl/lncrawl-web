@@ -34,7 +34,6 @@ const MainLayoutDesktop: React.FC<any> = () => {
         style={{
           minHeight: '100vh',
           padding: 20,
-          paddingBottom: 50,
           position: 'relative',
         }}
       >

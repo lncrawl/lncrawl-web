@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 
 export const Favicon: React.FC<
   Omit<AvatarProps, 'src'> & {
-    url: string;
+    url?: string;
   }
 > = ({ url, ...props }) => {
   const faviconLink = useMemo(() => {
