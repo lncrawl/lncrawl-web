@@ -174,6 +174,8 @@ export interface Artifact extends _Base {
 }
 
 export interface SourceItem {
+  id: string;
+  md5: string;
   url: string;
   domain: string;
   version: number;

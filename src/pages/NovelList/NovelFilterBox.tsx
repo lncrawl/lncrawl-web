@@ -58,6 +58,7 @@ export const NovelFilterBox: React.FC<
       {/* Search Input */}
       <Input.Search
         defaultValue={initialSearch}
+        onClear={() => updateParams({ search: '', page: 1 })}
         onSearch={(search) => updateParams({ search, page: 1 })}
         placeholder="Search novels"
         allowClear

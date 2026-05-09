@@ -15,7 +15,7 @@ import { Card, Flex, Space, Tag, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { getLanguageLabel } from './utils';
 
-export const SupportedSourceCard: React.FC<{
+export const SourceListCard: React.FC<{
   source: SourceItem;
   disabled?: boolean;
 }> = ({ source, disabled }) => {

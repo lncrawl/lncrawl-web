@@ -86,6 +86,7 @@ export const FeedbackListPage: React.FC<any> = () => {
         />
         <Input.Search
           defaultValue={initialSearch}
+          onClear={() => updateParams({ search: '', page: 1 })}
           onSearch={(search) => updateParams({ search, page: 1 })}
           placeholder="Search feedback"
           allowClear

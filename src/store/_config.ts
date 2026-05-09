@@ -70,7 +70,7 @@ export const ConfigSlice = createSlice({
   name: 'config',
   initialState: buildInitialState(),
   reducers: {
-    setSupportedSourcesPageSize(state, action: PayloadAction<number>) {
+    setSourceListPageSize(state, action: PayloadAction<number>) {
       const { min, max } = CONFIG_LIMITS.pageSize;
       state.supportSourcesPageSize = clamp(action.payload, min, max);
     },
@@ -151,7 +151,7 @@ export const ConfigSlice = createSlice({
 //
 const selectConfigState = (state: RootState) => state.config;
 
-const supportedSourcesPageSize = createSelector(
+const SourceListPageSize = createSelector(
   selectConfigState,
   (s) => s.supportSourcesPageSize
 );
@@ -227,7 +227,7 @@ const novelListPageSizeSm = createSelector(
 export const Config = {
   action: ConfigSlice.actions,
   select: {
-    supportedSourcesPageSize,
+    SourceListPageSize,
     jobListPageSize,
     jobListRefreshIntervalMs,
     listFetchDelayMs,

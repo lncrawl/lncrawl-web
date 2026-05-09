@@ -3,15 +3,15 @@ import { Config } from '@/store/_config';
 import type { SourceItem } from '@/types';
 import { List } from 'antd';
 import { useSelector } from 'react-redux';
-import { SupportedSourceCard } from './SupportedSourceCard';
+import { SourceListCard } from './SourceListCard';
 
-export const SupportedSourceList: React.FC<{
+export const SourceListView: React.FC<{
   sources: SourceItem[];
   disabled?: boolean;
 }> = ({ sources, disabled }) => {
-  const defaultPageSize = useSelector(Config.select.supportedSourcesPageSize);
+  const defaultPageSize = useSelector(Config.select.SourceListPageSize);
   const updatePageSize = (pageSize: number) => {
-    store.dispatch(Config.action.setSupportedSourcesPageSize(pageSize));
+    store.dispatch(Config.action.setSourceListPageSize(pageSize));
   };
   return (
     <>
@@ -21,7 +21,7 @@ export const SupportedSourceList: React.FC<{
         grid={{ gutter: 5, column: 1 }}
         renderItem={(source) => (
           <List.Item style={{ margin: 0, marginTop: 5, padding: 0 }}>
-            <SupportedSourceCard source={source} disabled={disabled} />
+            <SourceListCard source={source} disabled={disabled} />
           </List.Item>
         )}
         pagination={{

@@ -1,5 +1,5 @@
 import type { SourceItem } from '@/types';
-import type { SourceFilterState } from './SupportedSourceFilter';
+import type { SourceFilterState } from './SourceListFilter';
 
 /**
  * Get the language label for a language code
@@ -29,31 +29,52 @@ export function filterAndSortSources(
   const { language, search, features, sortBy, sortOrder } = filter;
   let data = [...sources];
 
+  const active = [];
+  const disabled = [];
+  const used = [];
+  for (const src of data) {
+    if (src.is_disabled) {
+      disabled.push(src);
+    } else {
+      active.push(src);
+    }
+    if (src.total_novels > 0) {
+      used.push(src);
+    }
+  }
+
   // Apply filters
   const searchLower = search?.trim().toLowerCase();
-  if (language || searchLower || Object.values(features).some(Boolean)) {
-    data = data.filter((src) => {
-      if (language && src.language !== language) {
-        return false;
-      }
-      if (searchLower && !src.domain.toLowerCase().includes(searchLower)) {
-        return false;
-      }
-      if (features.has_manga && !src.has_manga) {
-        return false;
-      }
-      if (features.has_mtl && !src.has_mtl) {
-        return false;
-      }
-      if (features.can_search && !src.can_search) {
-        return false;
-      }
-      if (features.can_login && !src.can_login) {
-        return false;
-      }
-      return true;
-    });
-  }
+  data = data.filter((src) => {
+    if (filter.tab === 'active' && src.is_disabled) {
+      return false;
+    }
+    if (filter.tab === 'disabled' && !src.is_disabled) {
+      return false;
+    }
+    if (filter.tab === 'used' && (src.is_disabled || src.total_novels === 0)) {
+      return false;
+    }
+    if (language && src.language !== language) {
+      return false;
+    }
+    if (searchLower && !src.domain.toLowerCase().includes(searchLower)) {
+      return false;
+    }
+    if (features.has_manga && !src.has_manga) {
+      return false;
+    }
+    if (features.has_mtl && !src.has_mtl) {
+      return false;
+    }
+    if (features.can_search && !src.can_search) {
+      return false;
+    }
+    if (features.can_login && !src.can_login) {
+      return false;
+    }
+    return true;
+  });
 
   // Apply sorting
   if (sortBy) {

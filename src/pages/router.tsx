@@ -51,9 +51,9 @@ const SettingsPage = lazy(() =>
 const SignupPage = lazy(() =>
   import('./Signup').then((m) => ({ default: m.SignupPage }))
 );
-const SupportedSourcesPage = lazy(() =>
-  import('./SupportedSources').then((m) => ({
-    default: m.SupportedSourcesPage,
+const SourceListPage = lazy(() =>
+  import('./SourceList').then((m) => ({
+    default: m.SourceListPage,
   }))
 );
 const TutorialPage = lazy(() =>
@@ -148,7 +148,7 @@ export const USER_ROUTES: RouteObject[] = [
         children: [
           {
             path: 'sources',
-            element: withSuspense(<SupportedSourcesPage />),
+            element: withSuspense(<SourceListPage />),
           },
         ],
       },

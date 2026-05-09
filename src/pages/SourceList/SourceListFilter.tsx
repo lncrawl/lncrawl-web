@@ -7,35 +7,28 @@ import {
   SortDescendingOutlined,
   TranslationOutlined,
 } from '@ant-design/icons';
-import { Config } from '@/store/_config';
 import { Button, Flex, Input, Select, Space } from 'antd';
-import { isEqual, sortedUniqBy } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { sortedUniqBy } from 'lodash';
+import React, { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getLanguageLabel } from './utils';
 
+type TabKey = 'active' | 'used' | 'disabled';
 type SortBy = 'domain' | 'total_novels' | 'total_commits' | 'version';
 type SortOrder = 'asc' | 'desc';
 
 export type SourceFilterState = {
-  search: string;
+  tab: TabKey;
+  search?: string;
   language?: string;
+  sortBy?: SortBy;
+  sortOrder: SortOrder;
   features: {
     has_manga?: boolean;
     has_mtl?: boolean;
     can_search?: boolean;
     can_login?: boolean;
   };
-  sortBy?: SortBy;
-  sortOrder: SortOrder;
-};
-
-const defaultSourceFilters: SourceFilterState = {
-  search: '',
-  language: undefined,
-  features: {},
-  sortBy: 'version',
-  sortOrder: 'desc',
 };
 
 const defaultSortOrder: Record<SortBy, SortOrder> = {
@@ -46,18 +39,11 @@ const defaultSortOrder: Record<SortBy, SortOrder> = {
 };
 
 export const SupportedSourceFilter: React.FC<{
+  value: SourceFilterState;
   onChange: (f: SourceFilterState) => void;
   languages: string[];
-}> = ({ onChange, languages }) => {
-  const [filter, setFilter] = useState(defaultSourceFilters);
-  const listFilterDebounceMs = useSelector(Config.select.listFilterDebounceMs);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(filter);
-    }, listFilterDebounceMs);
-    return () => clearTimeout(timeout);
-  }, [filter, onChange, listFilterDebounceMs]);
+}> = ({ value: filter, onChange: setFilter, languages }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const sortByOptions = [
     { value: 'domain', label: 'Domain' },
@@ -78,26 +64,25 @@ export const SupportedSourceFilter: React.FC<{
   }, [languages]);
 
   const toggleFeature = (feature: keyof SourceFilterState['features']) => {
-    setFilter((prev) => ({
-      ...prev,
+    setFilter({
+      ...filter,
       features: {
-        ...prev.features,
-        [feature]: !prev.features[feature],
+        ...filter.features,
+        [feature]: !filter.features[feature],
       },
-    }));
+    });
   };
 
   return (
     <Flex align="center" gap={5} wrap>
       {/* Search */}
-      <Input
+      <Input.Search
+        defaultValue={filter.search}
+        onClear={() => setFilter({ ...filter, search: '' })}
+        onSearch={(search) => setFilter({ ...filter, search })}
         allowClear
         prefix={<SearchOutlined />}
         placeholder="Search by URL"
-        value={filter.search}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setFilter({ ...filter, search: e.target.value })
-        }
         style={{ flex: 2, minWidth: 250 }}
       />
 
@@ -187,11 +172,11 @@ export const SupportedSourceFilter: React.FC<{
       </Space>
 
       {/* Clear Filters */}
-      {!isEqual(filter, defaultSourceFilters) && (
+      {searchParams.size > 0 && (
         <Button
           shape="round"
           icon={<ClearOutlined />}
-          onClick={() => setFilter(defaultSourceFilters)}
+          onClick={() => setSearchParams({})}
         />
       )}
     </Flex>

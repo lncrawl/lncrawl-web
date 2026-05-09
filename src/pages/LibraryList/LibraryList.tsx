@@ -27,7 +27,6 @@ export const LibraryList: React.FC<{
   const [error, setError] = useState<string>();
   const [total, setTotal] = useState(0);
   const [libraries, setLibraries] = useState<Library[]>([]);
-  const [searchValue, setSearchValue] = useState('');
 
   const page = useMemo(() => {
     return parseInt(searchParams.get('page') || '1', 10);
@@ -36,10 +35,6 @@ export const LibraryList: React.FC<{
   const query = useMemo(() => {
     return searchParams.get('query') || '';
   }, [searchParams]);
-
-  useEffect(() => {
-    setSearchValue(query);
-  }, [query]);
 
   const updateParams = useCallback(
     (updates: SearchParams) => {
@@ -92,14 +87,12 @@ export const LibraryList: React.FC<{
   return (
     <Flex vertical gap={16}>
       <Input.Search
+        defaultValue={query}
+        onClear={() => updateParams({ query: '' })}
+        onSearch={(value) => updateParams({ query: value })}
         size="large"
         allowClear
-        value={searchValue}
-        defaultValue={query}
         placeholder="Search libraries"
-        onClear={() => updateParams({ query: '' })}
-        onChange={(e) => setSearchValue(e.target.value)}
-        onSearch={(value) => updateParams({ query: value })}
       />
 
       {loading ? (

@@ -92,7 +92,7 @@ const LIST_PAGE_ROWS: FrontendConfigItem[] = [
       'How many sources appear on each page when you choose or browse supported sources.',
     ...CONFIG_LIMITS.pageSize,
     get: (s) => s.supportSourcesPageSize,
-    set: Config.action.setSupportedSourcesPageSize,
+    set: Config.action.setSourceListPageSize,
   },
 ];
 
