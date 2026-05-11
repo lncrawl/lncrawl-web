@@ -1,10 +1,14 @@
 const _mask24 = (1 << 24) - 1;
-type Theme = 'light' | 'dark';
 
-function buildColor(code: number, theme: Theme): string {
-  const start = theme === 'dark' ? 0x09 : 0xcf;
-  const stop = theme === 'dark' ? 0x3f : 0xf5;
+interface GeneratorTheme {
+  start: number;
+  stop: number;
+}
 
+export const darkGradient: GeneratorTheme = { start: 0x09, stop: 0x3f };
+export const lightGradient: GeneratorTheme = { start: 0xcf, stop: 0xf5 };
+
+function buildColor(code: number, { start, stop }: GeneratorTheme): string {
   const range = stop - start;
   const r = (code & range) + start;
   code >>= 8;
@@ -22,7 +26,7 @@ function buildColor(code: number, theme: Theme): string {
 /**
  * Get a random color (non-deterministic)
  */
-export function getRandomColor(theme: Theme = 'dark'): string {
+export function getRandomColor(theme: GeneratorTheme = darkGradient): string {
   const code = Math.floor(Math.random() * (_mask24 + 1));
   return buildColor(code, theme);
 }
@@ -30,9 +34,12 @@ export function getRandomColor(theme: Theme = 'dark'): string {
 /**
  * Generate a deterministic random color based on a ID
  */
-export function getColorForId(id: string = '', theme: Theme = 'dark'): string {
+export function getColorForId(
+  id: string = '',
+  theme: GeneratorTheme = darkGradient
+): string {
   let code = _mask24;
-  for (let i = 0; i < id.length && i < 6; ++i) {
+  for (let i = 0; i < id.length; ++i) {
     code ^= (code << 4) ^ id.charCodeAt(i);
     code ^= code >>> 24;
     code = code << 4;
@@ -42,13 +49,14 @@ export function getColorForId(id: string = '', theme: Theme = 'dark'): string {
 /**
  * Get a random gradient (non-deterministic)
  */
-export function getRandomGradient(
-  theme: Theme = 'dark',
-  degress?: number
-): string {
+export function getRandomGradient(opts?: {
+  degress?: number;
+  theme?: GeneratorTheme;
+}): string {
+  const theme = opts?.theme ?? darkGradient;
+  const degress = opts?.degress ?? Math.floor(Math.random() * 360);
   const color1 = getRandomColor(theme);
   const color2 = getRandomColor(theme);
-  degress ??= Math.floor(Math.random() * 360);
   return `linear-gradient(${degress}deg, ${color1}, ${color2})`;
 }
 
@@ -57,11 +65,15 @@ export function getRandomGradient(
  */
 export function getGradientForId(
   id: string = '',
-  theme: Theme = 'dark',
-  degress: number = 135
+  opts?: {
+    degress?: number;
+    theme?: GeneratorTheme;
+  }
 ): string {
   const first = id.slice(0, 6);
   const second = id.slice(Math.max(id.length - 6, 0));
+  const degress = opts?.degress ?? 135;
+  const theme = opts?.theme ?? darkGradient;
   const color1 = getColorForId(first, theme);
   const color2 = getColorForId(second, theme);
   return `linear-gradient(${degress}deg, ${color1}, ${color2})`;

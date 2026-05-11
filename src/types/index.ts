@@ -174,21 +174,28 @@ export interface Artifact extends _Base {
 }
 
 export interface SourceItem {
-  id: string;
-  md5: string;
-  url: string;
   domain: string;
-  version: number;
-  has_manga: boolean;
-  has_mtl: boolean;
-  language: string;
+  url: string;
   is_disabled: boolean;
   disable_reason?: string;
+
+  version: number;
+  md5: string;
+  crawler_id: string;
+  file_path: string;
+
+  language: string;
+  has_manga: boolean;
+  has_mtl: boolean;
   can_search: boolean;
   can_login: boolean;
+
   total_commits: number;
   contributors: string[];
   total_novels: number;
+
+  github_url: string;
+  github_edit_url: string;
 }
 
 export interface ReadHistory extends Record<string, boolean> {}
@@ -230,6 +237,12 @@ export interface Announcement extends _Base {
   is_active: boolean;
   version: number;
   created_by?: string;
+}
+
+export interface SourcePRResponse {
+  url: string;
+  branch: string;
+  sha: string;
 }
 
 export interface Feedback extends _Base {

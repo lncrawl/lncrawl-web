@@ -1,4 +1,4 @@
-import { Divider, Grid, Layout } from 'antd';
+import { Grid, Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
 import { AnnouncementBanner } from '../AnnouncementBanner';
 import { MobileLayoutHeader } from './_header';
@@ -50,13 +50,13 @@ const MainLayoutMobile: React.FC<any> = () => {
         style={{
           minHeight: '100vh',
           position: 'relative',
-          padding: 10,
           paddingBottom: 120,
         }}
       >
         <MobileLayoutHeader />
-        <Divider size="small" />
-        <PageContainer />
+        <div style={{ padding: 10, height: '100%' }}>
+          <PageContainer />
+        </div>
       </Layout.Content>
 
       <MobileNavbar />
@@ -65,8 +65,8 @@ const MainLayoutMobile: React.FC<any> = () => {
 };
 
 export const MainLayout: React.FC<any> = () => {
-  const { md: isDesktop } = Grid.useBreakpoint();
-  if (isDesktop) {
+  const screen = Grid.useBreakpoint();
+  if (screen.md) {
     return <MainLayoutDesktop />;
   }
   return <MainLayoutMobile />;

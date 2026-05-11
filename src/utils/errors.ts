@@ -18,7 +18,13 @@ export function stringifyError(
     if (err.response?.status === 401 || err.response?.status === 403) {
       return 'Not authorized';
     }
+  } else if (err instanceof Error) {
+    return `${err.name}: ${err.message}\n${err.stack}`;
+  } else if (typeof err === 'object') {
+    try {
+      return JSON.stringify(err);
+    } catch {}
   }
 
-  return _default || '' + err;
+  return _default || String(err);
 }

@@ -65,7 +65,7 @@ export const NovelDetailsCard: React.FC<{
           <Typography.Link
             href={novel.url}
             target="_blank"
-            rel="noreferrer noopener"
+            rel="nofollow noreferrer noopener"
             style={{ fontSize: '24px' }}
           >
             <ExportOutlined />

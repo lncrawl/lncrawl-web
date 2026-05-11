@@ -8,8 +8,8 @@ import { Button, Divider, Empty, Flex, message, Typography } from 'antd';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useSourceList } from './hooks';
-import { SourceListTabSelector } from './SourceListTabSelector';
 import { SupportedSourceFilter } from './SourceListFilter';
+import { SourceListTabSelector } from './SourceListTabSelector';
 import { SourceListView } from './SourceListView';
 
 export const SourceListPage: React.FC<any> = () => {

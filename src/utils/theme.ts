@@ -4,8 +4,12 @@ import { theme } from 'antd';
 export const appTheme: ThemeConfig = {
   algorithm: [theme.darkAlgorithm],
   token: {
+    colorText: '#ffffff',
     colorPrimary: '#1d6a3c',
     colorBgLayout: '#1c1c1c',
+    colorLink: '#8dc5f8',
+    colorLinkHover: '#cda8f0',
+    colorLinkActive: '#7f9ef3',
     fontFamily:
       "'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
   },
@@ -20,10 +24,8 @@ export const appTheme: ThemeConfig = {
       colorPrimary: '#a9d134',
       subMenuItemBg: 'transparent',
     },
-    Typography: {
-      colorLink: '#8dc5f8',
-      colorLinkHover: '#cda8f0',
-      colorLinkActive: '#7f9ef3',
+    Splitter: {
+      splitBarSize: 1,
     },
   },
 };
