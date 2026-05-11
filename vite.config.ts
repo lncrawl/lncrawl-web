@@ -6,6 +6,11 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 // https://vite.dev/config/
 export default defineConfig({
   base: '/',
+  resolve: {
+    alias: {
+      'lodash': 'lodash-es',
+    },
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
