@@ -3,27 +3,35 @@ import type { SourceItem } from '@/types';
 import { getGradientForId } from '@/utils/gradients';
 import { formatDate, parseDate } from '@/utils/time';
 import {
+  CodeOutlined,
   FlagOutlined,
   GlobalOutlined,
+  LinkOutlined,
   LoginOutlined,
   PictureOutlined,
   SearchOutlined,
   StopOutlined,
   TranslationOutlined,
 } from '@ant-design/icons';
-import { Card, Flex, Space, Tag, Typography } from 'antd';
-import { Link } from 'react-router-dom';
+import { Button, Card, Flex, Tag, Typography } from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
 import { getLanguageLabel } from './utils';
 
 export const SourceListCard: React.FC<{
   source: SourceItem;
   disabled?: boolean;
 }> = ({ source, disabled }) => {
+  const navigate = useNavigate();
   const updatedAt = formatDate(parseDate(Number(source.version) * 1000));
 
   return (
-    <Card size="small" style={{ opacity: disabled ? 0.8 : 1 }}>
-      <Space size={15} style={{ width: '100%' }}>
+    <Card
+      size="small"
+      style={{
+        opacity: disabled ? 0.8 : 1,
+      }}
+    >
+      <Flex align="center" gap={15} style={{ width: '100%' }}>
         <Favicon
           size="large"
           url={source.url}
@@ -31,12 +39,12 @@ export const SourceListCard: React.FC<{
           icon={disabled ? <StopOutlined /> : <GlobalOutlined />}
         />
 
-        <Flex vertical>
+        <Flex vertical flex={1} align="start">
           <Typography.Link
             strong
             href={source.url}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="nofollow noopener noreferrer"
             style={{ margin: 0, fontSize: 16 }}
           >
             {source.url}
@@ -87,7 +95,28 @@ export const SourceListCard: React.FC<{
             )}
           </Flex>
         </Flex>
-      </Space>
+
+        <Flex vertical align="center" gap={4}>
+          <Button
+            block
+            size="small"
+            target="_blank"
+            icon={<LinkOutlined />}
+            rel="external alternate"
+            href={source.github_url.replace('/blob/', '/edit/')}
+          >
+            View
+          </Button>
+          <Button
+            block
+            size="small"
+            icon={<CodeOutlined />}
+            onClick={() => navigate(`/source/${source.domain}`)}
+          >
+            Test
+          </Button>
+        </Flex>
+      </Flex>
     </Card>
   );
 };

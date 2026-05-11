@@ -128,3 +128,11 @@ export const TextAlign = {
   justify: 'justify',
 };
 export type TextAlign = (typeof TextAlign)[keyof typeof TextAlign];
+
+export const TestStatus = {
+  idle: 'idle',
+  running: 'running',
+  passed: 'passed',
+  failed: 'failed',
+};
+export type TestStatus = (typeof TestStatus)[keyof typeof TestStatus];

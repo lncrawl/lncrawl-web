@@ -15,6 +15,7 @@ import {
 } from 'redux-persist';
 import { Auth, AuthSlice, authPersistConfig } from './_auth';
 import { ConfigSlice, configPersistConfig } from './_config';
+import { EditorSlice, editorPersistConfig } from './_editor';
 import { ReaderSlice, readerPersistConfig } from './_reader';
 import { ViewSlice, viewPersistConfig } from './_view';
 
@@ -23,6 +24,7 @@ const reducer = combineReducers({
   auth: persistReducer(authPersistConfig, AuthSlice.reducer),
   reader: persistReducer(readerPersistConfig, ReaderSlice.reducer),
   config: persistReducer(configPersistConfig, ConfigSlice.reducer),
+  editor: persistReducer(editorPersistConfig, EditorSlice.reducer),
 });
 
 export type RootState = ReturnType<typeof reducer>;
@@ -62,7 +64,7 @@ export async function onBeforeLift() {
 
   // set view as
   if (query.viewAs) {
-    const viewAs = String(query.viewAs);
+    const viewAs = String(query.viewAs) as UserRole;
     if (Object.values(UserRole).includes(viewAs)) {
       store.dispatch(Auth.action.setViewAs(viewAs));
     }

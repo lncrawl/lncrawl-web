@@ -13,6 +13,8 @@ export default defineConfig({
     emptyOutDir: true,
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
+      // monaco-editor is loaded from CDN at runtime — exclude from bundle
+      external: ['monaco-editor'],
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],

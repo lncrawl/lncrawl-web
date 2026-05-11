@@ -3,6 +3,7 @@ import { LoadingState } from '@/components/Loading/LoadingState';
 import { AuthLayout, MainLayout, ReaderLayout } from '@/components/Layout';
 import { lazy, Suspense } from 'react';
 import { Navigate, type RouteObject } from 'react-router-dom';
+import { EditorLayout } from '@/components/Layout/editor';
 
 const AnnouncementListPage = lazy(() =>
   import('./AnnouncementList').then((m) => ({
@@ -50,6 +51,9 @@ const SettingsPage = lazy(() =>
 );
 const SignupPage = lazy(() =>
   import('./Signup').then((m) => ({ default: m.SignupPage }))
+);
+const SourceEditorPage = lazy(() =>
+  import('./SourceEditor').then((m) => ({ default: m.SourceEditorPage }))
 );
 const SourceListPage = lazy(() =>
   import('./SourceList').then((m) => ({
@@ -159,6 +163,16 @@ export const USER_ROUTES: RouteObject[] = [
       {
         path: 'tutorial',
         element: withSuspense(<TutorialPage />),
+      },
+    ],
+  },
+  {
+    path: 'source',
+    element: <EditorLayout />,
+    children: [
+      {
+        path: ':domain',
+        element: withSuspense(<SourceEditorPage />),
       },
     ],
   },
