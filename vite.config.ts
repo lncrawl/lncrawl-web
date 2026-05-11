@@ -3,12 +3,20 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
+const vendors = {
+  'vendor-react': /\/(react|react-dom|react-router)\//i,
+  'vendor-redux': /\/(@reduxjs|react-redux|redux-persist)\//i,
+  // antd and all @ant-design/* packages (cssinjs, icons, colors) must share one chunk --
+  // they cross-import antd internals and splitting them creates circular dependencies.
+  'vendor-antd': /\/(antd|@ant-design)\//i,
+};
+
 // https://vite.dev/config/
 export default defineConfig({
   base: '/',
   resolve: {
     alias: {
-      'lodash': 'lodash-es',
+      lodash: 'lodash-es',
     },
   },
   build: {
@@ -18,14 +26,22 @@ export default defineConfig({
     emptyOutDir: true,
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
-      // monaco-editor is loaded from CDN at runtime — exclude from bundle
+      // monaco-editor is loaded from CDN at runtime -- exclude from bundle
       external: ['monaco-editor'],
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-antd': ['antd'],
-          'vendor-antd-icons': ['@ant-design/icons'],
-          'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
+        // Rename index-[hash].js chunks to their parent directory name for readability
+        chunkFileNames(chunkInfo) {
+          if (chunkInfo.name === 'index' && chunkInfo.facadeModuleId) {
+            const match = chunkInfo.facadeModuleId.match(/\/([^/]+)\/index\.[tj]sx?$/);
+            if (match) return `assets/${match[1]}-[hash].js`;
+          }
+          return 'assets/[name]-[hash].js';
+        },
+        manualChunks(id) {
+          if (!id.includes('/node_modules/')) return;
+          for (const [name, pattern] of Object.entries(vendors)) {
+            if (pattern.test(id)) return name;
+          }
         },
       },
     },
