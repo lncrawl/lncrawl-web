@@ -1,1 +1,0 @@
-import{j as r}from"./index-Bp899jY_.js";import{F as o,a6 as a,B as i}from"./vendor-antd-CoJ_Bs0M.js";const c=({title:e,error:s,onRetry:t})=>r.jsx(o,{align:"center",justify:"center",style:{height:"100%"},children:r.jsx(a,{status:"error",title:e,subTitle:s||"An error occurred while loading the data.",extra:t?r.jsx(i,{onClick:t,children:"Retry"},"retry"):void 0})});export{c as E};

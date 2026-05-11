@@ -1,0 +1,1 @@
+import{z as n,h as i,j as o}from"./index-CoWBEDt2.js";import{a as e,A as c}from"./vendor-antd-CoJ_Bs0M.js";import{A as m}from"./vendor-antd-icons-CRyVVfaU.js";const A=({url:s,...r})=>{const a=e.useMemo(()=>{if(!s)return null;const t=n.stringify({url:s});return`${i}/api/meta/favicon?${t}`},[s]);return o.jsx(c,{size:24,icon:o.jsx(m,{}),...r,src:a})};export{A as F};
