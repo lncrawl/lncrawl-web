@@ -1,5 +1,5 @@
 import type { ConfigProperty, ConfigSection } from '@/types';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 
 export function rowKey(
   section: ConfigSection,

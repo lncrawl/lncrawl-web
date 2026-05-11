@@ -8,7 +8,7 @@ import {
   TranslationOutlined,
 } from '@ant-design/icons';
 import { Button, Flex, Input, Select, Space } from 'antd';
-import { sortedUniqBy } from 'lodash';
+import { sortedUniqBy } from 'lodash-es';
 import React, { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getLanguageLabel } from './utils';

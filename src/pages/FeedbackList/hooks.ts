@@ -3,7 +3,7 @@ import type { Feedback, Paginated } from '@/types';
 import { FeedbackStatus, FeedbackType } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import axios from 'axios';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';

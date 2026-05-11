@@ -3,7 +3,7 @@ import { Reader } from '@/store/_reader';
 import { TextAlign } from '@/types';
 import { AlignLeftOutlined } from '@ant-design/icons';
 import { Flex, Select, Tag } from 'antd';
-import { startCase } from 'lodash';
+import { startCase } from 'lodash-es';
 import { useSelector } from 'react-redux';
 import type { ReaderSettingsItem } from './types';
 

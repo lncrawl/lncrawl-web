@@ -3,7 +3,7 @@ import { Reader } from '@/store/_reader';
 import { FontFamily } from '@/types';
 import { FontColorsOutlined } from '@ant-design/icons';
 import { Select } from 'antd';
-import { startCase } from 'lodash';
+import { startCase } from 'lodash-es';
 import { useSelector } from 'react-redux';
 import type { ReaderSettingsItem } from './types';
 

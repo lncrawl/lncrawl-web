@@ -22,11 +22,6 @@ export default defineConfig({
     minifySyntax: true,
     minifyWhitespace: true,
   },
-  resolve: {
-    alias: {
-      lodash: 'lodash-es',
-    },
-  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

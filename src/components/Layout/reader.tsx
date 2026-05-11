@@ -1,5 +1,5 @@
 import { Grid, Layout } from 'antd';
-import { throttle } from 'lodash';
+import { throttle } from 'lodash-es';
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { MobileLayoutHeader } from './_header';

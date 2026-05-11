@@ -3,7 +3,7 @@ import { Reader } from '@/store/_reader';
 import { ReaderTheme } from '@/types';
 import { BgColorsOutlined, CheckOutlined } from '@ant-design/icons';
 import { Avatar, Flex, Popover } from 'antd';
-import { isEqual, startCase } from 'lodash';
+import { isEqual, startCase } from 'lodash-es';
 import { useSelector } from 'react-redux';
 import type { ReaderSettingsItem } from './types';
 
