@@ -162,7 +162,7 @@ export const LogViewer: React.FC<{
   return (
     <div
       style={{
-        flex: 1,
+        // flex: 1,
         minHeight: 100,
         borderRadius: 6,
         overflow: 'hidden',

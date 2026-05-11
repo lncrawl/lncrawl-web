@@ -2,10 +2,12 @@ import { TEST_PASSED_MARKER } from '@/components/LogViewer/helper';
 import { API_BASE_URL } from '@/config';
 import { store } from '@/store';
 import { Auth } from '@/store/_auth';
+import { Editor } from '@/store/_editor';
 import { type SourceItem, TestStatus } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Form } from 'antd';
 import { useCallback, useRef, useState } from 'react';
+import { TidyURL } from 'tidy-url';
 
 const MAX_LOG_LINES = 5000;
 
@@ -35,7 +37,17 @@ export const useTestRunner = (source?: SourceItem, content?: string) => {
       setLogs([]);
       setStatus(TestStatus.running);
 
-      const { url } = await form.validateFields(['url']);
+      const fields = await form.validateFields(['url']);
+      const trimmed = fields.url.replace(/[\n\r\t ]+/g, '');
+      const { url } = TidyURL.clean(trimmed);
+
+      form.setFieldValue('url', url);
+      store.dispatch(
+        Editor.action.addNovelUrl({
+          url,
+          domain: source.domain,
+        })
+      );
 
       setLoading(true);
       const authorization = Auth.select.authorization(store.getState());

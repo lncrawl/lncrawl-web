@@ -54,7 +54,7 @@ export const EditorHeader: React.FC<{
         <Button
           type="text"
           onClick={() => {
-            store.dispatch(Editor.action.toggleTestPanelCollapse());
+            store.dispatch(Editor.action.toggleTestPanel());
           }}
           icon={
             isTestPanelCollapsed ? (

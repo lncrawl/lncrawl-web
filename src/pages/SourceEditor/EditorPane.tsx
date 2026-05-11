@@ -34,7 +34,7 @@ export const EditorPane: React.FC<Props> = ({
       onChange={onChange}
       onMount={handleMount}
       options={{
-        readOnly: true,
+        // readOnly: true,
         padding: { top: 10, bottom: 10 },
         lineNumbersMinChars: screen.md ? 4 : 3,
         fontSize: 14,

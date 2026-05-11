@@ -30,7 +30,7 @@ export const TesterHeader: React.FC<{
         <Button
           type="text"
           onClick={() => {
-            store.dispatch(Editor.action.toggleEditorCollapse());
+            store.dispatch(Editor.action.toggleEditorPanel());
           }}
           icon={
             isEditorCollapsed ? <DoubleRightOutlined /> : <DoubleLeftOutlined />
