@@ -19,7 +19,7 @@ import { LRUCache } from 'lru-cache';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
-import { JobListPage } from '../JobList';
+import { JobList } from '../JobList';
 import { ChapterDetailsCard } from '../NovelDetails/ChapterDetailsCard';
 import { NovelDetailsCard } from '../NovelDetails/NovelDetailsCard';
 import { VolumeDetailsCard } from '../NovelDetails/VolumeDetailsCard';
@@ -157,7 +157,7 @@ export const JobDetailsPage: React.FC<any> = () => {
       {chapter && <ChapterDetailsCard chapter={chapter} />}
       {artifact && <ArtifactListCard artifacts={[artifact]} />}
 
-      <JobListPage
+      <JobList
         key={job.id + job.is_done}
         parentJobId={job.id}
         autoRefresh={!job.is_done}

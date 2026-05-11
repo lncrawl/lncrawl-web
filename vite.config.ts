@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react-swc';
 import { defineConfig } from 'vite';
+import { analyzer } from 'vite-bundle-analyzer';
 import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
@@ -8,12 +9,19 @@ const vendors = {
   'vendor-redux': /\/(@reduxjs|react-redux|redux-persist)\//i,
   // antd and all @ant-design/* packages (cssinjs, icons, colors) must share one chunk --
   // they cross-import antd internals and splitting them creates circular dependencies.
-  'vendor-antd': /\/(antd|@ant-design)\//i,
+  'vendor-antd': /\/(antd)\//i,
 };
 
 // https://vite.dev/config/
 export default defineConfig({
   base: '/',
+  esbuild: {
+    legalComments: 'none',
+    drop: ['console', 'debugger'],
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
+  },
   resolve: {
     alias: {
       lodash: 'lodash-es',
@@ -24,7 +32,7 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: 'hidden',
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 1024,
     rollupOptions: {
       // monaco-editor is loaded from CDN at runtime -- exclude from bundle
       external: ['monaco-editor'],
@@ -32,7 +40,9 @@ export default defineConfig({
         // Rename index-[hash].js chunks to their parent directory name for readability
         chunkFileNames(chunkInfo) {
           if (chunkInfo.name === 'index' && chunkInfo.facadeModuleId) {
-            const match = chunkInfo.facadeModuleId.match(/\/([^/]+)\/index\.[tj]sx?$/);
+            const match = chunkInfo.facadeModuleId.match(
+              /\/([^/]+)\/index\.[tj]sx?$/
+            );
             if (match) return `assets/${match[1]}-[hash].js`;
           }
           return 'assets/[name]-[hash].js';
@@ -49,6 +59,9 @@ export default defineConfig({
   plugins: [
     react(),
     tsconfigPaths(),
+    analyzer({
+      enabled: process.argv.includes('--analyze'),
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
@@ -61,7 +74,7 @@ export default defineConfig({
         short_name: 'LNCrawl',
         description: 'Download novels from online sources and generate e-books',
         theme_color: '#009587',
-        background_color: '#ffffff',
+        background_color: '#1c1c1c',
         display: 'standalone',
         categories: ['reader', 'novel', 'ebook', 'lightnovel'],
         icons: [

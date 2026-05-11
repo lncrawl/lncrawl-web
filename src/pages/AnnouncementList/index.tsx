@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AnnouncementListItemCard } from './AnnouncementListItemCard';
 import { useAnnouncementModal } from './useAnnouncementModal';
 
-export const AnnouncementListPage: React.FC = () => {
+export const AnnouncementList: React.FC = () => {
   const screens = Grid.useBreakpoint();
   const [messageApi, messageContext] = message.useMessage();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -133,4 +133,4 @@ export const AnnouncementListPage: React.FC = () => {
   );
 };
 
-export default AnnouncementListPage;
+export default AnnouncementList;

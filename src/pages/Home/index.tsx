@@ -4,10 +4,10 @@ import { Divider, Tabs, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import { JobListPage } from '../JobList';
+import { JobList } from '../JobList';
 import { RequestNovelCard } from './RequestNovelCard';
 
-export const HomePage: React.FC<any> = () => {
+export const Home: React.FC<any> = () => {
   const user = useSelector(Auth.select.user);
   const isAdmin = useSelector(Auth.select.isAdmin);
   const isLocalUser = useSelector(Auth.select.isLocal);
@@ -63,7 +63,7 @@ export const HomePage: React.FC<any> = () => {
         ]}
       />
 
-      <JobListPage
+      <JobList
         key={tab}
         autoRefresh
         userId={tab === 'my' ? user?.id : undefined}

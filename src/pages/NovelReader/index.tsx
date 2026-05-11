@@ -1,5 +1,5 @@
 import './fonts.css';
-import './index.scss';
+import './NovelReader.scss';
 
 import { store } from '@/store';
 import { Reader } from '@/store/_reader';
@@ -10,7 +10,7 @@ import { ReaderVerticalLayout } from './ReaderVerticalLayout';
 import { useChapterPreloader } from './hooks/useChapterPreloader';
 import { useWakeLock } from './hooks/useWakeLock';
 
-export const NovelReaderPage: React.FC<any> = () => {
+export const NovelReader: React.FC<any> = () => {
   useWakeLock();
 
   const { id } = useParams<{ id: string }>();

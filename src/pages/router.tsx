@@ -7,7 +7,7 @@ import { EditorLayout } from '@/components/Layout/editor';
 
 const AnnouncementListPage = lazy(() =>
   import('./AnnouncementList').then((m) => ({
-    default: m.AnnouncementListPage,
+    default: m.AnnouncementList,
   }))
 );
 const FeedbackDetailsPage = lazy(() =>
@@ -32,7 +32,7 @@ const LoginPage = lazy(() =>
   import('./Login').then((m) => ({ default: m.LoginPage }))
 );
 const MainPage = lazy(() =>
-  import('./HomePage').then((m) => ({ default: m.HomePage }))
+  import('./Home').then((m) => ({ default: m.Home }))
 );
 const NovelDetailsPage = lazy(() =>
   import('./NovelDetails').then((m) => ({ default: m.NovelDetailsPage }))
@@ -41,7 +41,7 @@ const NovelListPage = lazy(() =>
   import('./NovelList').then((m) => ({ default: m.NovelListPage }))
 );
 const NovelReaderPage = lazy(() =>
-  import('./NovelReader').then((m) => ({ default: m.NovelReaderPage }))
+  import('./NovelReader').then((m) => ({ default: m.NovelReader }))
 );
 const ResetPasswordPage = lazy(() =>
   import('./ResetPassword').then((m) => ({ default: m.ResetPasswordPage }))

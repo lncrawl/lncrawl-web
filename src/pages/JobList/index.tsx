@@ -6,7 +6,7 @@ import { useJobList } from './hooks';
 import { JobFilterBox } from './JobFilterBox';
 import { JobListItemCard } from './JobListItemCard';
 
-export const JobListPage: React.FC<{
+export const JobList: React.FC<{
   title?: JSX.Element;
   userId?: string;
   parentJobId?: string;

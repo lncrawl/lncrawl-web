@@ -7,7 +7,7 @@ import { Divider, Typography } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { JobListPage } from '../JobList';
+import { JobList } from '../JobList';
 import { ReferrerCard } from './ReferrerCard';
 import { UserDetailsActions } from './UserDetailsActions';
 import { UserDetailSection } from './UserDetailSection';
@@ -71,7 +71,7 @@ export const UserDetailsPage: React.FC<any> = () => {
 
       <ReferrerCard referrerId={user.referrer_id} />
 
-      <JobListPage
+      <JobList
         userId={id}
         autoRefresh
         title={
