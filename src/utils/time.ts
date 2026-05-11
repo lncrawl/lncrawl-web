@@ -1,4 +1,7 @@
-import moment, { type MomentInput } from 'moment';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 export function parseDate(value?: string | number): Date | undefined {
   try {
@@ -40,12 +43,14 @@ export function formatDifference(a: Date, b: Date): string {
   }
 }
 
-export function formatDate(value?: MomentInput) {
-  return moment(value).format('lll');
+export function formatDate(value?: string | number | Date | null) {
+  if (!value) return '';
+  return dayjs(value).format('MMM D, YYYY h:mm A');
 }
 
-export function formatFromNow(value?: MomentInput) {
-  return moment(value).fromNow();
+export function formatFromNow(value?: string | number | Date | null) {
+  if (!value) return '';
+  return dayjs(value).fromNow();
 }
 
 export function calculateRemaining(started: number, progress: number): string {
