@@ -6,7 +6,13 @@ export const EditorLayout: React.FC<any> = () => {
   const screen = Grid.useBreakpoint();
 
   return (
-    <Layout style={{ background: '#1e1e1e' }}>
+    <Layout
+      style={{
+        height: '100vh',
+        background: '#1e1e1e',
+        overflow: 'hidden',
+      }}
+    >
       {screen.md && (
         <MainLayoutSidebar
           style={{
@@ -15,15 +21,7 @@ export const EditorLayout: React.FC<any> = () => {
           }}
         />
       )}
-      <Layout.Content
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-          height: 'calc(100vh)',
-        }}
-      >
-        <Outlet />
-      </Layout.Content>
+      <Outlet />
     </Layout>
   );
 };

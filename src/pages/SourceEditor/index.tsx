@@ -36,21 +36,34 @@ export const SourceEditorPage: React.FC<any> = () => {
 
   return (
     <Splitter
-      style={{ height: '100%' }}
+      style={{ height: '100vh', overflow: 'hidden' }}
       onResize={([panel1, panel2]) => {
         store.dispatch(Editor.action.setPanelSizes([panel1, panel2]));
       }}
     >
-      <Splitter.Panel size={sizes[0]} min={panelConfig.panel1.min}>
+      <Splitter.Panel
+        size={sizes[0]}
+        min={panelConfig.panel1.min}
+        style={{ overflow: 'hidden' }}
+      >
         <EditorHeader source={source} />
         <div style={{ height: 'calc(100% - 50px)', position: 'relative' }}>
           <EditorPane code={code} onRunTest={() => testRunner.runTest()} />
         </div>
       </Splitter.Panel>
 
-      <Splitter.Panel size={sizes[1]} min={panelConfig.panel2.min}>
+      <Splitter.Panel
+        size={sizes[1]}
+        min={panelConfig.panel2.min}
+        style={{ overflow: 'hidden' }}
+      >
         <TesterHeader source={source} />
-        <div style={{ height: 'calc(100% - 50px)', padding: '15px 10px' }}>
+        <div
+          style={{
+            height: 'calc(100% - 50px)',
+            padding: '15px 10px',
+          }}
+        >
           <TestRunner source={source} runner={testRunner} />
         </div>
       </Splitter.Panel>
