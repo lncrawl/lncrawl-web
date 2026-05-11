@@ -1,1 +1,0 @@
-import{r as n,j as r}from"./vendor-react-DNGim5IY.js";import{y as i,h as e}from"./index-Cn9qR2fD.js";import{A as c,ag as m}from"./vendor-antd-BSsDuGQh.js";const j=({url:s,...o})=>{const a=n.useMemo(()=>{if(!s)return null;const t=i.stringify({url:s});return`${e}/api/meta/favicon?${t}`},[s]);return r.jsx(c,{size:24,icon:r.jsx(m,{}),...o,src:a})};export{j as F};
