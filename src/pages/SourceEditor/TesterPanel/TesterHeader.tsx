@@ -1,14 +1,15 @@
 import { Favicon } from '@/components/Favicon';
-import { store } from '@/store';
 import { Editor } from '@/store/_editor';
 import { DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons';
 import { Button, Divider, Flex } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-export const TesterHeader: React.FC<any> = () => {
+export const TesterHeader: React.FC<{
+  isEditorCollapsed: boolean;
+  onToggleEditorCollapse: () => any;
+}> = ({ isEditorCollapsed, onToggleEditorCollapse }) => {
   const source = useSelector(Editor.select.currentSource);
-  const isEditorCollapsed = useSelector(Editor.select.editorPanelCollapsed);
   return (
     <>
       <Flex
@@ -27,9 +28,7 @@ export const TesterHeader: React.FC<any> = () => {
       >
         <Button
           type="text"
-          onClick={() => {
-            store.dispatch(Editor.action.toggleEditorPanel());
-          }}
+          onClick={() => onToggleEditorCollapse()}
           icon={
             isEditorCollapsed ? <DoubleRightOutlined /> : <DoubleLeftOutlined />
           }

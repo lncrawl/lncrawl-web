@@ -1,29 +1,29 @@
-import { TEST_PASSED_MARKER } from '@/components/LogViewer/helper';
 import { API_BASE_URL } from '@/config';
+import { TEST_PASSED_MARKER } from '@/pages/SourceEditor/LogViewer/helper';
 import { store } from '@/store';
 import { Auth } from '@/store/_auth';
 import { Editor } from '@/store/_editor';
 import { TestStatus } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Form } from 'antd';
-import { useCallback, useRef, useState } from 'react';
+import { KeyCode, KeyMod } from 'monaco-editor';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { TidyURL } from 'tidy-url';
-
-const MAX_LOG_LINES = 5000;
+import { useCurrentEditor } from '../EditorPanel/EditorRef';
 
 interface FormValues {
   url: string;
 }
 
 export const useTestRunner = () => {
+  const editor = useCurrentEditor();
   const abortRef = useRef(new AbortController());
   const source = useSelector(Editor.select.currentSource);
   const content = useSelector(Editor.select.currentDraft);
 
   const [form] = Form.useForm<FormValues>();
   const [logs, setLogs] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<TestStatus>(TestStatus.idle);
 
   const abortTest = useCallback(() => {
@@ -47,7 +47,6 @@ export const useTestRunner = () => {
       form.setFieldValue('url', url);
       store.dispatch(Editor.action.addNovelUrl(url));
 
-      setLoading(true);
       const authorization = Auth.select.authorization(store.getState());
       const res = await fetch(
         `${API_BASE_URL}/api/source/${source.domain}/test`,
@@ -61,7 +60,6 @@ export const useTestRunner = () => {
           signal: abortRef.current.signal,
         }
       );
-      setLoading(false);
 
       if (!res.ok || !res.body) {
         throw new Error(`HTTP ${res.status}`);
@@ -75,7 +73,7 @@ export const useTestRunner = () => {
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n').filter((l) => l.trim());
-        setLogs((prev) => [...prev, ...lines].slice(-MAX_LOG_LINES));
+        setLogs((prev) => [...prev, ...lines]);
         if (chunk.includes(TEST_PASSED_MARKER)) {
           passed = true;
         }
@@ -85,15 +83,18 @@ export const useTestRunner = () => {
     } catch (err) {
       setLogs((prev) => [...prev, `<!> ${stringifyError(err)}`]);
       setStatus(TestStatus.failed);
-      setLoading(false);
     }
   }, [source?.domain, form, content, abortTest]);
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyR, runTest);
+  }, [editor, runTest]);
 
   return {
     form,
     logs,
     status,
-    loading,
     runTest,
     abortTest,
   };

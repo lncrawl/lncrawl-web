@@ -1,5 +1,4 @@
 import LncrawlImage from '@/assets/lncrawl.svg';
-import { getColorForId } from '@/utils/gradients';
 import { Avatar, Flex, theme, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
@@ -48,17 +47,23 @@ export const MobileLayoutHeader: React.FC<any> = () => {
         cursor: 'pointer',
         userSelect: 'none',
         padding: '0 10px',
+        background: '#141414',
         borderBottom: `1px solid ${token.colorBorderSecondary}`,
-        background: getColorForId(location.pathname, { start: 10, stop: 30 }),
       }}
     >
       <Avatar
+        size={24}
         shape="square"
         src={LncrawlImage}
-        size={24}
         style={{ paddingBottom: 3 }}
       />
-      <Typography.Text strong style={{ fontSize: 16 }}>
+      <Typography.Text
+        style={{
+          fontSize: 16,
+          fontWeight: 500,
+          fontFamily: 'monospace',
+        }}
+      >
         Lightnovel Crawler
       </Typography.Text>
     </Flex>

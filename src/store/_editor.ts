@@ -5,11 +5,16 @@ import * as idb from 'idb-keyval';
 import type { PersistConfig } from 'redux-persist';
 import type { RootState } from '.';
 
-const MAX_HISTORY_PER_DOMAIN = 50;
+const MAX_URL_HISTORY_PER_DOMAIN = 50;
 
 export interface DomainHistory {
   url: string;
   time: number;
+}
+
+export interface CodeDraft {
+  code: string;
+  version: number;
 }
 
 interface EditorState {
@@ -18,168 +23,137 @@ interface EditorState {
     draft: string;
     source: SourceItem;
   } | null;
-  codeDrafts: Record<string, string>;
-  urlHistory: Record<string, DomainHistory[]>;
-  panelSizes: [number | undefined, number | undefined];
-  panelConfig: {
-    panel1: { min: number };
-    panel2: { min: number; default: number };
-  };
+  codeDrafts: Record<string, CodeDraft | undefined>;
+  urlHistory: Record<string, DomainHistory[] | undefined>;
 }
 
 const initialState: EditorState = {
   current: null,
   codeDrafts: {},
   urlHistory: {},
-  panelSizes: [undefined, undefined],
-  panelConfig: {
-    panel1: { min: 500 },
-    panel2: { min: 300, default: 450 },
-  },
 };
 
 export const EditorSlice = createSlice({
   name: 'editor',
   initialState,
   reducers: {
-    setPanelSizes(state, action: PayloadAction<EditorState['panelSizes']>) {
-      state.panelSizes = [...action.payload];
-    },
-    toggleEditorPanel(state) {
-      const [a, b] = state.panelSizes;
-      const total = a && b ? a + b : undefined;
-      if (a !== 0) {
-        state.panelSizes = [0, total];
-      } else if (total) {
-        const m1 = state.panelConfig.panel1.min;
-        const m2 = state.panelConfig.panel2.min;
-        if (m1 + m2 > total) {
-          state.panelSizes = [total, 0];
-        } else {
-          const p2 = state.panelConfig.panel2.default;
-          const na = Math.max(m1, Math.min(total * 0.7, total - p2));
-          state.panelSizes = [na, total - na];
-        }
-      } else {
-        state.panelSizes = [undefined, undefined];
-      }
-    },
-    toggleTestPanel(state) {
-      const [a, b] = state.panelSizes;
-      const total = a && b ? a + b : undefined;
-      if (b !== 0) {
-        state.panelSizes = [total, 0];
-      } else if (total) {
-        const m1 = state.panelConfig.panel1.min;
-        const m2 = state.panelConfig.panel2.min;
-        if (m1 + m2 > total) {
-          state.panelSizes = [0, total];
-        } else {
-          const p2 = state.panelConfig.panel2.default;
-          const na = Math.max(m1, Math.min(total * 0.7, total - p2));
-          state.panelSizes = [na, total - na];
-        }
-      } else {
-        state.panelSizes = [undefined, undefined];
-      }
-    },
-    addNovelUrl(state, action: PayloadAction<string>) {
-      const url = action.payload;
-      const domain = new URL(url).host;
-      console.log(domain);
-      const item: DomainHistory = {
-        url,
-        time: Date.now(),
-      };
-      const history = (state.urlHistory[domain] || [])
-        .filter((x) => x.url !== url)
-        .slice(0, MAX_HISTORY_PER_DOMAIN - 1);
-      state.urlHistory[domain] = [item, ...history];
-    },
     setCurrent(
       state,
       action: PayloadAction<null | { code: string; source: SourceItem }>
     ) {
       if (!action.payload) {
         state.current = null;
-        return;
-      }
-      if (state.current?.source.domain !== action.payload.source.domain) {
+      } else {
         state.current = {
           code: action.payload.code,
           draft: action.payload.code,
           source: action.payload.source,
         };
-      } else {
-        state.current.code = action.payload.code;
-        state.current.source = action.payload.source;
-      }
-      const domain = state.current.source.domain;
-      if (state.codeDrafts[domain]) {
-        state.current.draft = state.codeDrafts[domain];
       }
     },
-    updateDraft(state, action: PayloadAction<string>) {
-      if (!state.current) {
-        throw Error('State is not initialized');
+    saveDraft(state, action: PayloadAction<string>) {
+      // payload -> draft ; draft -> history
+      if (state.current && state.current.draft !== action.payload) {
+        state.current.draft = action.payload;
+        state.codeDrafts[state.current.source.domain] = {
+          code: action.payload,
+          version: state.current.source.version,
+        };
       }
-      state.current.draft = action.payload;
-      const domain = state.current.source.domain;
-      state.codeDrafts[domain] = action.payload;
     },
-    clearDraft(state) {
+    undo(state) {
+      // draft -> history ; code -> draft
       if (state.current) {
+        state.codeDrafts[state.current.source.domain] = {
+          code: state.current.draft,
+          version: state.current.source.version,
+        };
         state.current.draft = state.current.code;
-        const domain = state.current.source.domain;
-        const history = { ...state.codeDrafts };
-        delete history[domain];
-        state.codeDrafts = history;
       }
+    },
+    redo(state) {
+      // history -> draft ; pop history
+      if (state.current) {
+        const domain = state.current.source.domain;
+        const history = state.codeDrafts[domain];
+        if (history?.version === state.current.source.version) {
+          state.current.draft = history.code;
+          delete state.codeDrafts[domain];
+        }
+      }
+    },
+    addNovelUrl(state, action: PayloadAction<string>) {
+      const url = action.payload;
+      const domain = extractDomain(url);
+      const item: DomainHistory = { url, time: Date.now() };
+      const history = (state.urlHistory[domain] || [])
+        .filter((x) => x.url !== url)
+        .slice(0, MAX_URL_HISTORY_PER_DOMAIN - 1);
+      state.urlHistory[domain] = [item, ...history];
     },
   },
 });
 
+const extractDomain = (url: string) => new URL(url).host.replace(/^www./, '');
+
 const selectEditor = (state: RootState) => state.editor;
+
+const selectUrlHistory = (url: string) =>
+  createSelector(
+    selectEditor,
+    (editor) => editor.urlHistory[extractDomain(url)] || []
+  );
+const selectCurrentSource = createSelector(
+  selectEditor,
+  (editor) => editor.current?.source
+);
+const selectCurrentContent = createSelector(
+  selectEditor,
+  (editor) => editor.current?.code
+);
+const selectCurrentDraft = createSelector(
+  selectEditor,
+  (editor) => editor.current?.draft
+);
+const selectCanUndo = createSelector(
+  selectCurrentContent,
+  selectCurrentDraft,
+  (original, current) => (original || '') != (current || '')
+);
+const selectPreviousDraft = createSelector(
+  selectEditor,
+  (state: EditorState) => {
+    if (!state.current) return;
+    const history = state.codeDrafts[state.current.source.domain];
+    if (history?.version === state.current.source.version) {
+      return history.code;
+    }
+  }
+);
+const selectCanRedo = createSelector(
+  selectCurrentDraft,
+  selectPreviousDraft,
+  (current, history) => (current || '') != (history || '')
+);
 
 export const Editor = {
   action: EditorSlice.actions,
   select: {
-    panelSizes: createSelector(selectEditor, (editor) => editor.panelSizes),
-    panelConfig: createSelector(selectEditor, (editor) => editor.panelConfig),
-    editorPanelCollapsed: createSelector(
-      selectEditor,
-      (editor) => editor.panelSizes[0] === 0
-    ),
-    testPanelCollapsed: createSelector(
-      selectEditor,
-      (editor) => editor.panelSizes[1] === 0
-    ),
-    getHistory: (baseUrl: string) =>
-      createSelector(
-        selectEditor,
-        (editor) => editor.urlHistory[new URL(baseUrl).host] || []
-      ),
-    currentSource: createSelector(
-      selectEditor,
-      (editor) => editor.current?.source
-    ),
-    currentDraft: createSelector(
-      selectEditor,
-      (editor) => editor.current?.draft
-    ),
-    currentContent: createSelector(
-      selectEditor,
-      (editor) => editor.current?.code
-    ),
+    urlHistory: selectUrlHistory,
+    currentSource: selectCurrentSource,
+    currentContent: selectCurrentContent,
+    currentDraft: selectCurrentDraft,
+    previousDraft: selectPreviousDraft,
+    canUndo: selectCanUndo,
+    canRedo: selectCanRedo,
   },
 };
 
 //
-// Persist Config
+// Persist state
 //
 const blacklist: Array<keyof EditorState> = [
   // items to exclude from local storage
-  'panelSizes',
   'current',
 ];
 
@@ -187,7 +161,7 @@ const store = idb.createStore('lncrawl', 'editor');
 
 export const editorPersistConfig: PersistConfig<EditorState> = {
   key: 'editor',
-  version: 3,
+  version: 1,
   blacklist,
   storage: {
     getItem: (key) => idb.get(key, store),

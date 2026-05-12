@@ -48,7 +48,7 @@ export const NovelDetailsCard: React.FC<{
           <Space size="small">
             <Favicon url={novel.url} />
             <Typography.Text type="secondary" style={{ fontSize: '18px' }}>
-              {novel.domain}
+              <Link to={`/source/${novel.domain}`}>{novel.domain}</Link>
             </Typography.Text>
           </Space>
           <Typography.Text style={{ fontSize: '24px', whiteSpace: 'wrap' }}>

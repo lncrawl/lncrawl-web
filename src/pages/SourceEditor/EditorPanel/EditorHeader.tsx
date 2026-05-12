@@ -1,4 +1,3 @@
-import { store } from '@/store';
 import { Editor } from '@/store/_editor';
 import {
   DoubleLeftOutlined,
@@ -10,9 +9,11 @@ import { Button, Divider, Flex } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-export const EditorHeader: React.FC<any> = () => {
+export const EditorHeader: React.FC<{
+  isTestPanelCollapsed: boolean;
+  onToggleTestPanelCollapse: () => any;
+}> = ({ isTestPanelCollapsed, onToggleTestPanelCollapse }) => {
   const source = useSelector(Editor.select.currentSource);
-  const isTestPanelCollapsed = useSelector(Editor.select.testPanelCollapsed);
   return (
     <>
       <Flex
@@ -53,9 +54,7 @@ export const EditorHeader: React.FC<any> = () => {
 
         <Button
           type="text"
-          onClick={() => {
-            store.dispatch(Editor.action.toggleTestPanel());
-          }}
+          onClick={() => onToggleTestPanelCollapse()}
           icon={
             isTestPanelCollapsed ? (
               <DoubleLeftOutlined />
