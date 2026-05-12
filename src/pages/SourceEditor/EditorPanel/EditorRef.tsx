@@ -19,11 +19,7 @@ class EditorRef {
   }
 }
 
-const editorRef = new EditorRef();
-
-export const useEditorRef = () => {
-  return editorRef;
-};
+export const editorRef = new EditorRef();
 
 export const useCurrentEditor = () => {
   const [editor, setEditor] = useState(editorRef.current);

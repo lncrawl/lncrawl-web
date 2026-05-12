@@ -67,12 +67,13 @@ export const EditorSlice = createSlice({
         state.draft = action.payload;
       }
     },
-    undo(state) {
+    undo(state, action: PayloadAction<string | undefined>) {
       // draft -> history ; code -> draft
       if (state.source) {
-        if (state.draft) {
+        const latest = action.payload ?? state.draft;
+        if (latest) {
           state.codeDrafts[state.source.domain] = {
-            code: state.draft,
+            code: latest,
             version: state.source.version,
           };
         } else {
@@ -88,6 +89,13 @@ export const EditorSlice = createSlice({
         if (history?.version === state.source.version) {
           state.draft = history.code;
         }
+      }
+    },
+    clear(state) {
+      // code -> draft ; delete history
+      if (state.source) {
+        state.draft = state.code;
+        delete state.codeDrafts[state.source.domain];
       }
     },
     addNovelUrl(state, action: PayloadAction<string>) {

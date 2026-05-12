@@ -1,35 +1,19 @@
-import { store } from '@/store';
 import { Editor } from '@/store/_editor';
-import { GithubOutlined, RedoOutlined, UndoOutlined } from '@ant-design/icons';
-import { Button, Flex, Grid, Popover, type ButtonProps } from 'antd';
-import { editor as monaco } from 'monaco-editor';
+import { formatDate, parseDate } from '@/utils/time';
+import {
+  CalendarOutlined,
+  ClearOutlined,
+  GithubOutlined,
+  RotateLeftOutlined,
+  RotateRightOutlined,
+} from '@ant-design/icons';
+import { Flex, Grid } from 'antd';
+import { KeyCode, KeyMod, editor as monaco } from 'monaco-editor';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useCurrentEditor } from './EditorRef';
-
-const Gap: React.FC<any> = () => <div style={{ minWidth: 5 }} />;
-
-const StatusBarButton: React.FC<ButtonProps> = ({ children, ...props }) => {
-  return (
-    <Button
-      type="text"
-      {...props}
-      style={{
-        height: '100%',
-        flexShrink: 0,
-        borderRadius: 0,
-        padding: '0 5px',
-        fontSize: 'inherit',
-        fontFamily: 'inherit',
-        color: props.disabled ? '#666' : 'inherit',
-        cursor: props.disabled ? 'default' : 'pointer',
-        ...props.style,
-      }}
-    >
-      {children}
-    </Button>
-  );
-};
+import { StatusBarButton } from './StatusBarButton';
+import { handleClear, handleRedo, handleUndo } from './utils';
 
 export const EditorStatusBar: React.FC<any> = () => {
   const editor = useCurrentEditor();
@@ -48,17 +32,22 @@ export const EditorStatusBar: React.FC<any> = () => {
   useEffect(() => {
     if (!editor) return;
 
+    // Override commands
+    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => {});
+
+    // Cursor position
     editor.onDidChangeCursorPosition((e) => {
       setCursor({ line: e.position.lineNumber, col: e.position.column });
     });
 
-    setReadOnly(editor.getOption(monaco.EditorOption.readOnly));
-    editor.onDidChangeConfiguration((e) => {
-      if (e.hasChanged(monaco.EditorOption.readOnly)) {
-        setReadOnly(editor.getOption(monaco.EditorOption.readOnly));
-      }
-    });
+    // Editor options
+    const updateEditorOptions = () => {
+      setReadOnly(editor.getOption(monaco.EditorOption.readOnly));
+    };
+    queueMicrotask(updateEditorOptions);
+    editor.onDidChangeConfiguration(updateEditorOptions);
 
+    // Model info
     const model = editor.getModel();
     if (model) {
       const updateModelInfo = () => {
@@ -68,31 +57,10 @@ export const EditorStatusBar: React.FC<any> = () => {
         setCanEditorUndo(model.canUndo());
         setCanEditorRedo(model.canRedo());
       };
-      updateModelInfo();
+      queueMicrotask(updateModelInfo);
       model.onDidChangeContent(updateModelInfo);
     }
   }, [editor]);
-
-  const handleUndo = () => {
-    const model = editor?.getModel();
-    if (model?.canUndo()) {
-      model.undo();
-    } else if (canUndo) {
-      store.dispatch(Editor.action.undo());
-    }
-    model?.popStackElement();
-  };
-
-  const handleRedo = () => {
-    const model = editor?.getModel();
-    if (model?.canRedo()) {
-      model.redo();
-    } else if (canRedo) {
-      store.dispatch(Editor.action.redo());
-    }
-  };
-
-  // TODO: reset state
 
   return (
     <Flex
@@ -111,26 +79,28 @@ export const EditorStatusBar: React.FC<any> = () => {
       }}
     >
       {readOnly ? (
-        <Popover
-          title="Editing is disabled for now. You can still view and edit it on Github"
-          style={{ fontWeight: 'normal', flexShrink: 0 }}
-        >
+        <StatusBarButton title="Editing is disabled for now. You can still view and edit it on Github">
           ⊘ Read Only
-        </Popover>
+        </StatusBarButton>
       ) : (
         <>
           <StatusBarButton
             onClick={handleUndo}
             disabled={!canUndo && !canEditorUndo}
           >
-            <UndoOutlined /> Undo
+            <RotateLeftOutlined /> Undo
           </StatusBarButton>
           <StatusBarButton
             onClick={handleRedo}
             disabled={!canRedo && !canEditorRedo}
           >
-            <RedoOutlined /> Redo
+            <RotateRightOutlined /> Redo
           </StatusBarButton>
+          {(canUndo || canRedo) && (
+            <StatusBarButton title="Clear" onClick={handleClear}>
+              <ClearOutlined />
+            </StatusBarButton>
+          )}
         </>
       )}
       {screen.lg && <></>}
@@ -138,11 +108,18 @@ export const EditorStatusBar: React.FC<any> = () => {
       <StatusBarButton>
         Ln {cursor.line}, Col {cursor.col}
       </StatusBarButton>
-      <Gap />
+      <div style={{ width: 5 }} />
       <StatusBarButton>
         {insertSpaces ? 'Spaces' : 'Tab Size'}: {tabSize}
       </StatusBarButton>
-      <Gap />
+      <div style={{ width: 5 }} />
+      {source && (
+        <StatusBarButton title={`Version: ${source.version}`}>
+          <CalendarOutlined />{' '}
+          {formatDate(parseDate(Number(source.version) * 1000))}
+        </StatusBarButton>
+      )}
+      <div style={{ width: 5 }} />
       {source && (
         <StatusBarButton
           href={source?.github_url}

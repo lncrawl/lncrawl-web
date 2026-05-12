@@ -63,11 +63,11 @@ export const usePanelSizes = () => {
     if (screen.xl !== false) return;
     if (isTesterCollapsed || isEditorCollapsed) return;
     if (isAdmin) {
-      collapseTester();
+      queueMicrotask(collapseTester);
     } else {
-      collapseTester();
+      queueMicrotask(collapseEditor);
     }
-  }, [screen.xl, isEditorCollapsed, isTesterCollapsed]);
+  }, [screen.xl, isAdmin, isEditorCollapsed, isTesterCollapsed]);
 
   return {
     editorSize,

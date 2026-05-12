@@ -4,14 +4,12 @@ import { Editor } from '@/store/_editor';
 import { Editor as MonacoEditor, type OnMount } from '@monaco-editor/react';
 import { Divider, Flex, Grid } from 'antd';
 import { throttle } from 'lodash-es';
-import { KeyCode, KeyMod } from 'monaco-editor';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useEditorRef } from './EditorRef';
+import { editorRef } from './EditorRef';
 import { EditorStatusBar } from './EditorStatusBar';
 
 export const EditorPane: React.FC<any> = () => {
-  const editorRef = useEditorRef();
   const screen = Grid.useBreakpoint();
   const isAdmin = useSelector(Auth.select.isAdmin);
   const draft = useSelector(Editor.select.currentDraft);
@@ -26,7 +24,7 @@ export const EditorPane: React.FC<any> = () => {
     } else {
       store.dispatch(Editor.action.undo());
     }
-    setReady(true);
+    queueMicrotask(() => setReady(true));
   }, [isAdmin, mounted]);
 
   useEffect(() => {
@@ -41,8 +39,6 @@ export const EditorPane: React.FC<any> = () => {
 
   const handleMount: OnMount = (editor) => {
     editorRef.current = editor;
-
-    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => {});
 
     editor.onDidChangeModelContent(
       throttle(() => {
