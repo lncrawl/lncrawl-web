@@ -4,23 +4,23 @@ import { throttle } from 'lodash-es';
 import { editorRef } from './EditorRef';
 
 export const handleUndo = throttle(() => {
-  const editor = editorRef.current;
-  if (!editor) return;
-  const model = editor.getModel();
+  const state = editorRef.current;
+  if (!state) return;
+  const model = state.editor.getModel();
   if (model?.canUndo()) {
     return model.undo();
   }
   const canUndo = Editor.select.canUndo(store.getState());
   if (canUndo) {
-    store.dispatch(Editor.action.undo(editor.getValue()));
+    store.dispatch(Editor.action.undo(state.editor.getValue()));
   }
   // model?.popStackElement();
 }, 100);
 
 export const handleRedo = throttle(() => {
-  const editor = editorRef.current;
-  if (!editor) return;
-  const model = editor.getModel();
+  const state = editorRef.current;
+  if (!state) return;
+  const model = state.editor.getModel();
   if (model?.canRedo()) {
     return model.redo();
   }
