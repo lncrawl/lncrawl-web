@@ -17,10 +17,15 @@ export default defineConfig({
   base: '/',
   esbuild: {
     legalComments: 'none',
-    drop: ['console', 'debugger'],
     minifyIdentifiers: true,
     minifySyntax: true,
     minifyWhitespace: true,
+    // drop: ['console', 'debugger'],
+  },
+  preview: {
+    proxy: {
+      '/api': process.env.VITE_API_BASE_URL || '',
+    },
   },
   build: {
     outDir: 'dist',

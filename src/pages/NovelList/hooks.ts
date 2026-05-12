@@ -1,6 +1,4 @@
-import { store } from '@/store';
 import { Config } from '@/store/_config';
-import { Editor } from '@/store/_editor';
 import type { Novel, Paginated } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Grid } from 'antd';
