@@ -183,6 +183,7 @@ export interface SourceItem {
   md5: string;
   crawler_id: string;
   file_path: string;
+  github_url: string;
 
   language: string;
   has_manga: boolean;
@@ -193,9 +194,6 @@ export interface SourceItem {
   total_commits: number;
   contributors: string[];
   total_novels: number;
-
-  github_url: string;
-  github_edit_url: string;
 }
 
 export interface ReadHistory extends Record<string, boolean> {}

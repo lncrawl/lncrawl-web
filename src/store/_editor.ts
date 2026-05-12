@@ -96,6 +96,46 @@ export const EditorSlice = createSlice({
         .slice(0, MAX_HISTORY_PER_DOMAIN - 1);
       state.urlHistory[domain] = [item, ...history];
     },
+    setCurrent(
+      state,
+      action: PayloadAction<null | { code: string; source: SourceItem }>
+    ) {
+      if (!action.payload) {
+        state.current = null;
+        return;
+      }
+      if (state.current?.source.domain !== action.payload.source.domain) {
+        state.current = {
+          code: action.payload.code,
+          draft: action.payload.code,
+          source: action.payload.source,
+        };
+      } else {
+        state.current.code = action.payload.code;
+        state.current.source = action.payload.source;
+      }
+      const domain = state.current.source.domain;
+      if (state.codeDrafts[domain]) {
+        state.current.draft = state.codeDrafts[domain];
+      }
+    },
+    updateDraft(state, action: PayloadAction<string>) {
+      if (!state.current) {
+        throw Error('State is not initialized');
+      }
+      state.current.draft = action.payload;
+      const domain = state.current.source.domain;
+      state.codeDrafts[domain] = action.payload;
+    },
+    clearDraft(state) {
+      if (state.current) {
+        state.current.draft = state.current.code;
+        const domain = state.current.source.domain;
+        const history = { ...state.codeDrafts };
+        delete history[domain];
+        state.codeDrafts = history;
+      }
+    },
   },
 });
 
@@ -119,6 +159,18 @@ export const Editor = {
         selectEditor,
         (editor) => editor.urlHistory[new URL(baseUrl).host] || []
       ),
+    currentSource: createSelector(
+      selectEditor,
+      (editor) => editor.current?.source
+    ),
+    currentDraft: createSelector(
+      selectEditor,
+      (editor) => editor.current?.draft
+    ),
+    currentContent: createSelector(
+      selectEditor,
+      (editor) => editor.current?.code
+    ),
   },
 };
 
@@ -128,6 +180,7 @@ export const Editor = {
 const blacklist: Array<keyof EditorState> = [
   // items to exclude from local storage
   'panelSizes',
+  'current',
 ];
 
 const store = idb.createStore('lncrawl', 'editor');

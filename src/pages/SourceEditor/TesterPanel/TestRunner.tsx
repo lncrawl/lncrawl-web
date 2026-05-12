@@ -130,7 +130,7 @@ const NovelUrlHistory: React.FC<{
   );
 };
 
-const NovelUrlInputArea: React.FC<{
+const NovelUrlForm: React.FC<{
   source: SourceItem;
   form: TestRunnerState['form'];
 }> = ({ form, source }) => {
@@ -183,15 +183,12 @@ const NovelUrlInputArea: React.FC<{
 };
 
 export const TestRunner: React.FC<{
-  source: SourceItem;
   runner: TestRunnerState;
-}> = ({
-  source,
-  runner: { form, status, logs, loading, runTest, abortTest },
-}) => {
+}> = ({ runner: { form, status, logs, loading, runTest, abortTest } }) => {
+  const source = useSelector(Editor.select.currentSource);
   return (
     <>
-      <NovelUrlInputArea source={source} form={form} />
+      {source && <NovelUrlForm form={form} source={source} />}
 
       <RunTestButton
         disabled={loading}

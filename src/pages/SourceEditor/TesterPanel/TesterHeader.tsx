@@ -1,15 +1,13 @@
 import { Favicon } from '@/components/Favicon';
 import { store } from '@/store';
 import { Editor } from '@/store/_editor';
-import type { SourceItem } from '@/types';
 import { DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons';
 import { Button, Divider, Flex } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-export const TesterHeader: React.FC<{
-  source: SourceItem;
-}> = ({ source }) => {
+export const TesterHeader: React.FC<any> = () => {
+  const source = useSelector(Editor.select.currentSource);
   const isEditorCollapsed = useSelector(Editor.select.editorPanelCollapsed);
   return (
     <>
@@ -47,17 +45,19 @@ export const TesterHeader: React.FC<{
           }}
         />
 
-        <Button
-          type="link"
-          size="middle"
-          href={source.url}
-          rel="nofollow noopener noreferrer"
-          target="_blank"
-          style={{ fontSize: 'inherit' }}
-        >
-          <Favicon url={source.url} />
-          {source.domain}
-        </Button>
+        {source && (
+          <Button
+            type="link"
+            size="middle"
+            href={source.url}
+            rel="nofollow noopener noreferrer"
+            target="_blank"
+            style={{ fontSize: 'inherit' }}
+          >
+            <Favicon url={source.url} />
+            {source.domain}
+          </Button>
+        )}
       </Flex>
       <Divider size="small" style={{ margin: 0 }} />
     </>

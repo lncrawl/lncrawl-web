@@ -1,6 +1,5 @@
 import { store } from '@/store';
 import { Editor } from '@/store/_editor';
-import type { SourceItem } from '@/types';
 import {
   DoubleLeftOutlined,
   DoubleRightOutlined,
@@ -11,9 +10,8 @@ import { Button, Divider, Flex } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-export const EditorHeader: React.FC<{
-  source: SourceItem;
-}> = ({ source }) => {
+export const EditorHeader: React.FC<any> = () => {
+  const source = useSelector(Editor.select.currentSource);
   const isTestPanelCollapsed = useSelector(Editor.select.testPanelCollapsed);
   return (
     <>
@@ -37,17 +35,19 @@ export const EditorHeader: React.FC<{
           onClick={() => window.history.back()}
         />
 
-        <Button
-          type="link"
-          size="middle"
-          title="Edit file directly in Github"
-          href={source.github_edit_url}
-          rel="external alternate"
-          target="_blank"
-          style={{ fontSize: 'inherit' }}
-        >
-          <GithubFilled style={{ fontSize: 20 }} />/{source.file_path}
-        </Button>
+        {source && (
+          <Button
+            type="link"
+            size="middle"
+            title="Edit file directly in Github"
+            href={source.github_url}
+            target="_blank"
+            rel="external alternate"
+            style={{ fontSize: 'inherit' }}
+          >
+            <GithubFilled style={{ fontSize: 20 }} />/{source.file_path}
+          </Button>
+        )}
 
         <div style={{ flex: 1 }} />
 

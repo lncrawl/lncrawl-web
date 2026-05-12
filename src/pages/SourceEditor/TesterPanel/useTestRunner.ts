@@ -3,10 +3,11 @@ import { API_BASE_URL } from '@/config';
 import { store } from '@/store';
 import { Auth } from '@/store/_auth';
 import { Editor } from '@/store/_editor';
-import { type SourceItem, TestStatus } from '@/types';
+import { TestStatus } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Form } from 'antd';
 import { useCallback, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { TidyURL } from 'tidy-url';
 
 const MAX_LOG_LINES = 5000;
@@ -15,8 +16,10 @@ interface FormValues {
   url: string;
 }
 
-export const useTestRunner = (source?: SourceItem, content?: string) => {
+export const useTestRunner = () => {
   const abortRef = useRef(new AbortController());
+  const source = useSelector(Editor.select.currentSource);
+  const content = useSelector(Editor.select.currentDraft);
 
   const [form] = Form.useForm<FormValues>();
   const [logs, setLogs] = useState<string[]>([]);

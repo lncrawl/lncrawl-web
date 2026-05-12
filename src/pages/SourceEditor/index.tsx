@@ -7,19 +7,19 @@ import { throttle } from 'lodash-es';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { EditorHeader } from './EditorHeader';
-import { EditorPane } from './EditorPane';
-import { TesterHeader } from './TesterHeader';
-import { TestRunner } from './TestRunner';
-import { useSourceCode } from './useSourceCode';
-import { useTestRunner } from './useTestRunner';
+import { EditorHeader } from './EditorPanel/EditorHeader';
+import { EditorPane } from './EditorPanel/EditorPane';
+import { useSourceCode } from './EditorPanel/useSourceCode';
+import { TesterHeader } from './TesterPanel/TesterHeader';
+import { TestRunner } from './TesterPanel/TestRunner';
+import { useTestRunner } from './TesterPanel/useTestRunner';
 
 const CONTAINER_CLASS = 'source-editor-container';
 
 export const SourceEditorPage: React.FC<any> = () => {
   const { domain } = useParams<{ domain: string }>();
-  const { loading, error, source, code, refresh } = useSourceCode(domain);
-  const testRunner = useTestRunner(source, code);
+  const { loading, error, refresh } = useSourceCode(domain);
+  const testRunner = useTestRunner();
 
   const sizes = useSelector(Editor.select.panelSizes);
   const panelConfig = useSelector(Editor.select.panelConfig);
@@ -52,7 +52,7 @@ export const SourceEditorPage: React.FC<any> = () => {
     return <LoadingState style={{ width: '100%' }} />;
   }
 
-  if (error || !source || !code) {
+  if (error) {
     return (
       <ErrorState
         error={error}
@@ -75,9 +75,9 @@ export const SourceEditorPage: React.FC<any> = () => {
         min={panelConfig.panel1.min}
         style={{ overflow: 'hidden' }}
       >
-        <EditorHeader source={source} />
+        <EditorHeader />
         <div style={{ height: 'calc(100% - 50px)', position: 'relative' }}>
-          <EditorPane code={code} onRunTest={() => testRunner.runTest()} />
+          <EditorPane onRunTest={() => testRunner.runTest()} />
         </div>
       </Splitter.Panel>
 
@@ -86,7 +86,7 @@ export const SourceEditorPage: React.FC<any> = () => {
         min={panelConfig.panel2.min}
         style={{ overflow: 'hidden' }}
       >
-        <TesterHeader source={source} />
+        <TesterHeader />
         <Flex
           vertical
           style={{
@@ -94,7 +94,7 @@ export const SourceEditorPage: React.FC<any> = () => {
             padding: '15px 10px',
           }}
         >
-          <TestRunner source={source} runner={testRunner} />
+          <TestRunner runner={testRunner} />
         </Flex>
       </Splitter.Panel>
     </Splitter>
