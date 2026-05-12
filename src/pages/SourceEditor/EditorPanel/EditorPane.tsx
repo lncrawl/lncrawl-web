@@ -29,16 +29,17 @@ export const EditorPane: React.FC<any> = () => {
 
   useEffect(() => {
     if (!ready) return;
-    const editor = editorRef.current;
-    if (!editor) return;
+    const state = editorRef.current;
+    if (!state) return;
+    const { editor } = state;
     const model = editor.getModel();
     if (draft && editor.getValue() !== draft) {
       model?.setValue(draft);
     }
   }, [draft, ready]);
 
-  const handleMount: OnMount = (editor) => {
-    editorRef.current = editor;
+  const handleMount: OnMount = (editor, monaco) => {
+    editorRef.current = { editor, monaco };
 
     editor.onDidChangeModelContent(
       throttle(() => {

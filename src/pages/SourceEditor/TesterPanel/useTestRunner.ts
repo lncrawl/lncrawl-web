@@ -6,7 +6,6 @@ import { Editor } from '@/store/_editor';
 import { TestStatus } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { Form } from 'antd';
-import { KeyCode, KeyMod } from 'monaco-editor';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { TidyURL } from 'tidy-url';
@@ -17,7 +16,7 @@ interface FormValues {
 }
 
 export const useTestRunner = () => {
-  const editor = useCurrentEditor();
+  const state = useCurrentEditor();
   const abortRef = useRef(new AbortController());
   const source = useSelector(Editor.select.currentSource);
   const content = useSelector(Editor.select.currentDraft);
@@ -87,9 +86,10 @@ export const useTestRunner = () => {
   }, [source?.domain, form, content, abortTest]);
 
   useEffect(() => {
-    if (!editor) return;
-    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyR, runTest);
-  }, [editor, runTest]);
+    if (!state) return;
+    const { editor, monaco } = state;
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR, runTest);
+  }, [state, runTest]);
 
   return {
     form,

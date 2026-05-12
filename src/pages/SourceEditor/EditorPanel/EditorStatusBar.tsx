@@ -8,7 +8,6 @@ import {
   RotateRightOutlined,
 } from '@ant-design/icons';
 import { Flex, Grid } from 'antd';
-import { KeyCode, KeyMod, editor as monaco } from 'monaco-editor';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useCurrentEditor } from './EditorRef';
@@ -16,7 +15,7 @@ import { StatusBarButton } from './StatusBarButton';
 import { handleClear, handleRedo, handleUndo } from './utils';
 
 export const EditorStatusBar: React.FC<any> = () => {
-  const editor = useCurrentEditor();
+  const state = useCurrentEditor();
   const screen = Grid.useBreakpoint();
   const canUndo = useSelector(Editor.select.canUndo);
   const canRedo = useSelector(Editor.select.canRedo);
@@ -30,10 +29,11 @@ export const EditorStatusBar: React.FC<any> = () => {
   const [canEditorRedo, setCanEditorRedo] = useState(false);
 
   useEffect(() => {
-    if (!editor) return;
+    if (!state) return;
+    const { editor, monaco } = state;
 
     // Override commands
-    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => {});
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {});
 
     // Cursor position
     editor.onDidChangeCursorPosition((e) => {
@@ -42,7 +42,7 @@ export const EditorStatusBar: React.FC<any> = () => {
 
     // Editor options
     const updateEditorOptions = () => {
-      setReadOnly(editor.getOption(monaco.EditorOption.readOnly));
+      setReadOnly(editor.getOption(monaco.editor.EditorOption.readOnly));
     };
     queueMicrotask(updateEditorOptions);
     editor.onDidChangeConfiguration(updateEditorOptions);
@@ -60,7 +60,7 @@ export const EditorStatusBar: React.FC<any> = () => {
       queueMicrotask(updateModelInfo);
       model.onDidChangeContent(updateModelInfo);
     }
-  }, [editor]);
+  }, [state]);
 
   return (
     <Flex
