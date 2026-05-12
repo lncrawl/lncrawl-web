@@ -5,7 +5,7 @@ import { Editor as MonacoEditor, type OnMount } from '@monaco-editor/react';
 import { Divider, Flex, Grid } from 'antd';
 import { throttle } from 'lodash-es';
 import { KeyCode, KeyMod } from 'monaco-editor';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useEditorRef } from './EditorRef';
 import { EditorStatusBar } from './EditorStatusBar';
@@ -16,35 +16,48 @@ export const EditorPane: React.FC<any> = () => {
   const isAdmin = useSelector(Auth.select.isAdmin);
   const draft = useSelector(Editor.select.currentDraft);
 
+  const [ready, setReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    if (!editorRef.current) return;
+    if (!mounted) return;
     if (isAdmin) {
       store.dispatch(Editor.action.redo());
     } else {
       store.dispatch(Editor.action.undo());
     }
-  }, [isAdmin]);
+    setReady(true);
+  }, [isAdmin, mounted]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const editor = editorRef.current;
+    if (!editor) return;
+    const model = editor.getModel();
+    if (draft && editor.getValue() !== draft) {
+      model?.setValue(draft);
+    }
+  }, [draft, ready]);
 
   const handleMount: OnMount = (editor) => {
-    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => {});
-
     editorRef.current = editor;
-    if (isAdmin) {
-      store.dispatch(Editor.action.redo());
-    }
+
+    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => {});
 
     editor.onDidChangeModelContent(
       throttle(() => {
-        store.dispatch(Editor.action.saveDraft(editor.getValue()));
+        const code = editor.getValue();
+        store.dispatch(Editor.action.saveDraft(code));
       }, 100)
     );
+
+    setMounted(true);
   };
 
   return (
     <Flex vertical style={{ height: '100%' }}>
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <MonacoEditor
-          value={draft}
           height="100%"
           theme="vs-dark"
           language="python"

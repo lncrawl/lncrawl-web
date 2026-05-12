@@ -18,17 +18,17 @@ export interface CodeDraft {
 }
 
 interface EditorState {
-  current: {
-    code: string;
-    draft: string;
-    source: SourceItem;
-  } | null;
+  code: string | null;
+  draft: string | null;
+  source: SourceItem | null;
   codeDrafts: Record<string, CodeDraft | undefined>;
   urlHistory: Record<string, DomainHistory[] | undefined>;
 }
 
 const initialState: EditorState = {
-  current: null,
+  code: null,
+  draft: null,
+  source: null,
   codeDrafts: {},
   urlHistory: {},
 };
@@ -39,46 +39,54 @@ export const EditorSlice = createSlice({
   reducers: {
     setCurrent(
       state,
-      action: PayloadAction<null | { code: string; source: SourceItem }>
+      action: PayloadAction<{ code: string; source: SourceItem } | null>
     ) {
       if (!action.payload) {
-        state.current = null;
+        state.code = null;
+        state.draft = null;
+        state.source = null;
       } else {
-        state.current = {
-          code: action.payload.code,
-          draft: action.payload.code,
-          source: action.payload.source,
-        };
+        if (state.source?.version !== action.payload.source.version) {
+          state.draft = action.payload.code;
+        }
+        state.code = action.payload.code;
+        state.source = action.payload.source;
       }
     },
     saveDraft(state, action: PayloadAction<string>) {
-      // payload -> draft ; draft -> history
-      if (state.current && state.current.draft !== action.payload) {
-        state.current.draft = action.payload;
-        state.codeDrafts[state.current.source.domain] = {
-          code: action.payload,
-          version: state.current.source.version,
-        };
+      // draft -> history ; payload -> draft
+      if (state.source && state.draft !== action.payload) {
+        if (state.draft) {
+          state.codeDrafts[state.source.domain] = {
+            code: state.draft,
+            version: state.source.version,
+          };
+        } else {
+          delete state.codeDrafts[state.source.domain];
+        }
+        state.draft = action.payload;
       }
     },
     undo(state) {
       // draft -> history ; code -> draft
-      if (state.current) {
-        state.codeDrafts[state.current.source.domain] = {
-          code: state.current.draft,
-          version: state.current.source.version,
-        };
-        state.current.draft = state.current.code;
+      if (state.source) {
+        if (state.draft) {
+          state.codeDrafts[state.source.domain] = {
+            code: state.draft,
+            version: state.source.version,
+          };
+        } else {
+          delete state.codeDrafts[state.source.domain];
+        }
+        state.draft = state.code;
       }
     },
     redo(state) {
-      // history -> draft ; pop history
-      if (state.current) {
-        const domain = state.current.source.domain;
-        const history = state.codeDrafts[domain];
-        if (history?.version === state.current.source.version) {
-          state.current.draft = history.code;
-          delete state.codeDrafts[domain];
+      // history -> draft
+      if (state.source) {
+        const history = state.codeDrafts[state.source.domain];
+        if (history?.version === state.source.version) {
+          state.draft = history.code;
         }
       }
     },
@@ -105,27 +113,27 @@ const selectUrlHistory = (url: string) =>
   );
 const selectCurrentSource = createSelector(
   selectEditor,
-  (editor) => editor.current?.source
+  (editor) => editor.source
 );
 const selectCurrentContent = createSelector(
   selectEditor,
-  (editor) => editor.current?.code
+  (editor) => editor.code
 );
 const selectCurrentDraft = createSelector(
   selectEditor,
-  (editor) => editor.current?.draft
+  (editor) => editor.draft
 );
 const selectCanUndo = createSelector(
   selectCurrentContent,
   selectCurrentDraft,
-  (original, current) => (original || '') != (current || '')
+  (original, current) => (original || '') !== (current || '')
 );
 const selectPreviousDraft = createSelector(
   selectEditor,
   (state: EditorState) => {
-    if (!state.current) return;
-    const history = state.codeDrafts[state.current.source.domain];
-    if (history?.version === state.current.source.version) {
+    if (!state.source) return;
+    const history = state.codeDrafts[state.source.domain];
+    if (history?.version === state.source.version) {
       return history.code;
     }
   }
@@ -133,7 +141,8 @@ const selectPreviousDraft = createSelector(
 const selectCanRedo = createSelector(
   selectCurrentDraft,
   selectPreviousDraft,
-  (current, history) => (current || '') != (history || '')
+  (current, history) =>
+    history !== undefined && (current || '') !== (history || '')
 );
 
 export const Editor = {
@@ -154,7 +163,6 @@ export const Editor = {
 //
 const blacklist: Array<keyof EditorState> = [
   // items to exclude from local storage
-  'current',
 ];
 
 const store = idb.createStore('lncrawl', 'editor');

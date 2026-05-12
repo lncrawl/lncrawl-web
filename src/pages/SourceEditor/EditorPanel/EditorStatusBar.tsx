@@ -92,6 +92,8 @@ export const EditorStatusBar: React.FC<any> = () => {
     }
   };
 
+  // TODO: reset state
+
   return (
     <Flex
       align="center"
