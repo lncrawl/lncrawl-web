@@ -1,5 +1,7 @@
 import { AddToLibraryButton } from '@/components/Library/AddToLibraryButton';
+import { store } from '@/store';
 import { Auth } from '@/store/_auth';
+import { Editor } from '@/store/_editor';
 import type { Job, Novel } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
@@ -15,6 +17,7 @@ export const NovelActionButtons: React.FC<{ novel: Novel }> = ({ novel }) => {
 
   const handleRefresh = async () => {
     try {
+      store.dispatch(Editor.action.addNovelUrl(novel.url));
       const result = await axios.post<Job>(`/api/job/create/fetch-novel`, {
         url: novel.url,
       });

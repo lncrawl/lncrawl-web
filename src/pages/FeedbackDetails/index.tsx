@@ -2,7 +2,9 @@ import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
 import { FeedbackStatusTag } from '@/components/Tags/FeedbackStatusTag';
 import { FeedbackTypeTag } from '@/components/Tags/FeedbackTypeTag';
+import { store } from '@/store';
 import { Auth } from '@/store/_auth';
+import { Editor } from '@/store/_editor';
 import type { Feedback, Job, Novel, User } from '@/types';
 import { FeedbackStatus } from '@/types';
 import { stringifyError } from '@/utils/errors';
@@ -17,12 +19,12 @@ import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { JobDetailsCard } from '../JobDetails/JobDetailsCard';
 import { UserDetailsCard } from '../JobDetails/UserDetailsCard';
+import { NovelDetailsCard } from '../NovelDetails/NovelDetailsCard';
 import { FeedbackDeleteButton } from './FeedbackDeleteButton';
 import { FeedbackEditButton } from './FeedbackEditButton';
 import { FeedbackRespondButton } from './FeedbackRespondButton';
-import { JobDetailsCard } from '../JobDetails/JobDetailsCard';
-import { NovelDetailsCard } from '../NovelDetails/NovelDetailsCard';
 
 export const FeedbackDetailsPage: React.FC<any> = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +59,7 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
       setNovel(undefined);
       try {
         const { data } = await axios.get<Novel>(`/api/novel/${novelId}`);
+        store.dispatch(Editor.action.addNovelUrl(data.url));
         setNovel(data);
       } catch {}
     };

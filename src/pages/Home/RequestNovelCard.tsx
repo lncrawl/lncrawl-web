@@ -1,3 +1,5 @@
+import { store } from '@/store';
+import { Editor } from '@/store/_editor';
 import type { Job } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { BookTwoTone, SendOutlined } from '@ant-design/icons';
@@ -8,23 +10,28 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TidyURL } from 'tidy-url';
 
+interface FormField {
+  url: string;
+}
+
 export const RequestNovelCard: React.FC<any> = () => {
   const { lg } = Grid.useBreakpoint();
 
-  const [form] = Form.useForm();
   const navigate = useNavigate();
+  const [form] = Form.useForm<FormField>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const submitJob = async (values: any) => {
+  const submitJob = async (values: FormField) => {
     setLoading(true);
     setError(undefined);
     try {
-      const result = await axios.post<Job>(`/api/job/create/fetch-novel`, {
+      store.dispatch(Editor.action.addNovelUrl(values.url));
+      const { data } = await axios.post<Job>(`/api/job/create/fetch-novel`, {
         ...values,
         full: true,
       });
-      navigate(`/job/${result.data.id}`);
+      navigate(`/job/${data.id}`);
     } catch (err) {
       setError(stringifyError(err, 'Oops! Something went wrong.'));
     } finally {
@@ -48,6 +55,7 @@ export const RequestNovelCard: React.FC<any> = () => {
       form={form}
       size="large"
       onFinish={submitJob}
+      initialValues={{ url: '' }}
       labelCol={{ style: { padding: 0 } }}
       encType="application/x-www-form-urlencoded"
     >

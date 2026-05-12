@@ -1,9 +1,7 @@
-import Editor, { loader, type OnMount } from '@monaco-editor/react';
+import { Auth } from '@/store/_auth';
+import { Editor, type OnMount } from '@monaco-editor/react';
 import { Grid } from 'antd';
-
-loader.config({
-  paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs' },
-});
+import { useSelector } from 'react-redux';
 
 interface Props {
   code: string;
@@ -19,6 +17,7 @@ export const EditorPane: React.FC<Props> = ({
   onRunTest = NOOP,
 }) => {
   const screen = Grid.useBreakpoint();
+  const isAdmin = useSelector(Auth.select.isAdmin);
 
   const handleMount: OnMount = (editor, monaco) => {
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, NOOP);
@@ -34,7 +33,7 @@ export const EditorPane: React.FC<Props> = ({
       onChange={onChange}
       onMount={handleMount}
       options={{
-        // readOnly: true,
+        readOnly: !isAdmin,
         padding: { top: 10, bottom: 10 },
         lineNumbersMinChars: screen.md ? 4 : 3,
         fontSize: 14,

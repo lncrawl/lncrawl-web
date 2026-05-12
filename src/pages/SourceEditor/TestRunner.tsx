@@ -1,12 +1,10 @@
 import { LogViewer } from '@/components/LogViewer';
-import { store } from '@/store';
 import { Editor, type DomainHistory } from '@/store/_editor';
 import type { SourceItem } from '@/types';
 import { TestStatus } from '@/types';
 import { formatFromNow } from '@/utils/time';
 import {
   CheckCircleOutlined,
-  ClearOutlined,
   CloseCircleOutlined,
   DownOutlined,
   HistoryOutlined,
@@ -83,43 +81,29 @@ const RunTestButton: React.FC<{
 
 const NovelUrlHistory: React.FC<{
   history: DomainHistory[];
-  onClear: () => any;
   onSelect: (url: string) => any;
-}> = ({ history, onSelect, onClear }) => {
+}> = ({ history, onSelect }) => {
   const { token } = theme.useToken();
 
   if (!history?.length) {
     return null;
   }
 
-  const items: MenuProps['items'] = [
-    ...(history.length > 0
-      ? [
-          {
-            key: 'action:clear',
-            label: 'Clear History',
-            icon: <ClearOutlined />,
-            onClick: () => onClear(),
-          },
-          { type: 'divider' as const },
-        ]
-      : []),
-    ...history.map(({ url, time }, i) => ({
-      key: url + i,
-      onClick: () => onSelect(url),
-      label: (
-        <>
-          {url}
-          <Typography.Text
-            type="secondary"
-            style={{ fontSize: 11, textAlign: 'right', paddingLeft: 5 }}
-          >
-            &middot; {formatFromNow(time)}
-          </Typography.Text>
-        </>
-      ),
-    })),
-  ];
+  const items: MenuProps['items'] = history.map(({ url, time }, i) => ({
+    key: url + i,
+    onClick: () => onSelect(url),
+    label: (
+      <>
+        {url}
+        <Typography.Text
+          type="secondary"
+          style={{ fontSize: 11, textAlign: 'right', paddingLeft: 5 }}
+        >
+          &middot; {formatFromNow(time)}
+        </Typography.Text>
+      </>
+    ),
+  }));
 
   return (
     <Dropdown
@@ -150,11 +134,7 @@ const NovelUrlInputArea: React.FC<{
   source: SourceItem;
   form: TestRunnerState['form'];
 }> = ({ form, source }) => {
-  const history = useSelector(Editor.select.getHistory(source.domain));
-
-  const handleClearHistory = () => {
-    store.dispatch(Editor.action.clearUrlHistory({ domain: source.domain }));
-  };
+  const history = useSelector(Editor.select.getHistory(source.url));
 
   return (
     <Form
@@ -168,7 +148,6 @@ const NovelUrlInputArea: React.FC<{
         </div>
         <NovelUrlHistory
           history={history}
-          onClear={handleClearHistory}
           onSelect={(url) => form.setFieldValue('url', url)}
         />
       </Flex>

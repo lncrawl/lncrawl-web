@@ -42,12 +42,7 @@ export const useTestRunner = (source?: SourceItem, content?: string) => {
       const { url } = TidyURL.clean(trimmed);
 
       form.setFieldValue('url', url);
-      store.dispatch(
-        Editor.action.addNovelUrl({
-          url,
-          domain: source.domain,
-        })
-      );
+      store.dispatch(Editor.action.addNovelUrl(url));
 
       setLoading(true);
       const authorization = Auth.select.authorization(store.getState());

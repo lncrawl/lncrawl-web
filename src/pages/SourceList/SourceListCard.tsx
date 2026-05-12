@@ -6,7 +6,6 @@ import {
   CodeOutlined,
   FlagOutlined,
   GlobalOutlined,
-  LinkOutlined,
   LoginOutlined,
   PictureOutlined,
   SearchOutlined,
@@ -27,6 +26,7 @@ export const SourceListCard: React.FC<{
   return (
     <Card
       size="small"
+      onClick={() => navigate(`/source/${source.domain}`)}
       style={{
         opacity: disabled ? 0.8 : 1,
       }}
@@ -97,22 +97,7 @@ export const SourceListCard: React.FC<{
         </Flex>
 
         <Flex vertical align="center" gap={4}>
-          <Button
-            block
-            size="small"
-            target="_blank"
-            icon={<LinkOutlined />}
-            rel="external alternate"
-            href={source.github_url.replace('/blob/', '/edit/')}
-          >
-            View
-          </Button>
-          <Button
-            block
-            size="small"
-            icon={<CodeOutlined />}
-            onClick={() => navigate(`/source/${source.domain}`)}
-          >
+          <Button block size="small" icon={<CodeOutlined />}>
             Test
           </Button>
         </Flex>

@@ -9,6 +9,8 @@ import { useParams } from 'react-router-dom';
 import { ArtifactListCard } from '../../components/ArtifactList/ArtifactListCard';
 import { NovelDetailsCard } from './NovelDetailsCard';
 import { VolumeListCard } from './VolumeListCard';
+import { store } from '@/store';
+import { Editor } from '@/store/_editor';
 
 export const NovelDetailsPage: React.FC<any> = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +30,7 @@ export const NovelDetailsPage: React.FC<any> = () => {
       setError(undefined);
       try {
         const { data: novel } = await axios.get<Novel>(`/api/novel/${id}`);
+        store.dispatch(Editor.action.addNovelUrl(novel.url));
         setNovel(novel);
       } catch (err: any) {
         setError(stringifyError(err));

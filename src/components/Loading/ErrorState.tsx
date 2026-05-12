@@ -6,7 +6,14 @@ export const ErrorState: React.FC<{
   onRetry?: () => void;
 }> = ({ title, error, onRetry }) => {
   return (
-    <Flex align="center" justify="center" style={{ height: '100%' }}>
+    <Flex
+      align="center"
+      justify="center"
+      style={{
+        width: '100%',
+        height: '100%',
+      }}
+    >
       <Result
         status="error"
         title={title}

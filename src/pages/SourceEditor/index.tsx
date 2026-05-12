@@ -49,7 +49,7 @@ export const SourceEditorPage: React.FC<any> = () => {
   }, []);
 
   if (loading) {
-    return <LoadingState />;
+    return <LoadingState style={{ width: '100%' }} />;
   }
 
   if (error || !source || !code) {

@@ -1,3 +1,4 @@
+import type { SourceItem } from '@/types';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import * as idb from 'idb-keyval';
@@ -12,15 +13,23 @@ export interface DomainHistory {
 }
 
 interface EditorState {
+  current: {
+    code: string;
+    draft: string;
+    source: SourceItem;
+  } | null;
+  codeDrafts: Record<string, string>;
+  urlHistory: Record<string, DomainHistory[]>;
   panelSizes: [number | undefined, number | undefined];
   panelConfig: {
     panel1: { min: number };
     panel2: { min: number; default: number };
   };
-  urlHistory: Record<string, DomainHistory[]>;
 }
 
 const initialState: EditorState = {
+  current: null,
+  codeDrafts: {},
   urlHistory: {},
   panelSizes: [undefined, undefined],
   panelConfig: {
@@ -74,8 +83,10 @@ export const EditorSlice = createSlice({
         state.panelSizes = [undefined, undefined];
       }
     },
-    addNovelUrl(state, action: PayloadAction<{ domain: string; url: string }>) {
-      const { domain, url } = action.payload;
+    addNovelUrl(state, action: PayloadAction<string>) {
+      const url = action.payload;
+      const domain = new URL(url).host;
+      console.log(domain);
       const item: DomainHistory = {
         url,
         time: Date.now(),
@@ -84,10 +95,6 @@ export const EditorSlice = createSlice({
         .filter((x) => x.url !== url)
         .slice(0, MAX_HISTORY_PER_DOMAIN - 1);
       state.urlHistory[domain] = [item, ...history];
-    },
-    clearUrlHistory(state, action: PayloadAction<{ domain: string }>) {
-      const { domain } = action.payload;
-      state.urlHistory[domain] = [];
     },
   },
 });
@@ -107,8 +114,11 @@ export const Editor = {
       selectEditor,
       (editor) => editor.panelSizes[1] === 0
     ),
-    getHistory: (domain: string) =>
-      createSelector(selectEditor, (editor) => editor.urlHistory[domain] || []),
+    getHistory: (baseUrl: string) =>
+      createSelector(
+        selectEditor,
+        (editor) => editor.urlHistory[new URL(baseUrl).host] || []
+      ),
   },
 };
 

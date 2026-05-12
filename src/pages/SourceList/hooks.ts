@@ -25,11 +25,11 @@ export function useSourceList() {
   );
   const sortBy: SourceFilterState['sortBy'] = useMemo(
     () =>
-      (searchParams.get('order') || 'version') as SourceFilterState['sortBy'],
+      (searchParams.get('sort') || 'version') as SourceFilterState['sortBy'],
     [searchParams]
   );
   const sortOrder: SourceFilterState['sortOrder'] = useMemo(
-    () => (searchParams.has('desc') ? 'desc' : 'asc'),
+    () => (searchParams.get('asc') === '1' ? 'asc' : 'desc'),
     [searchParams]
   );
   const search = useMemo(
@@ -79,15 +79,15 @@ export function useSourceList() {
           } else {
             next.delete('lang');
           }
-          if (updates.sortOrder === 'desc') {
-            next.set('desc', 'true');
+          if (updates.sortOrder === 'asc') {
+            next.set('asc', '1');
           } else {
-            next.delete('desc');
+            next.delete('asc');
           }
           if (updates.sortBy && updates.sortBy !== 'version') {
-            next.set('order', updates.sortBy);
+            next.set('sort', updates.sortBy);
           } else {
-            next.delete('order');
+            next.delete('sort');
           }
           const features = [
             updates.features.has_manga && 'manga',
