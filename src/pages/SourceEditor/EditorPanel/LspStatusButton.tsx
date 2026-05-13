@@ -1,6 +1,8 @@
+import { store } from '@/store';
 import { Editor } from '@/store/_editor';
 import type { LspLogEntry, LspStatus } from '@/utils/lsp';
-import { Popover } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
+import { Button, Flex, Popover } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { StatusBarButton } from './StatusBarButton';
@@ -18,7 +20,10 @@ const LOG_LEVEL_COLOR: Record<LspLogEntry['level'], string> = {
   error: '#f44336',
 };
 
-const LspLogsPopover: React.FC<any> = () => {
+const LspLogsPopover: React.FC<{
+  status: LspStatus;
+  onClose: () => any;
+}> = ({ status, onClose }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const logs = useSelector(Editor.select.lspLogs);
 
@@ -30,26 +35,55 @@ const LspLogsPopover: React.FC<any> = () => {
     <div
       style={{
         width: 340,
-        maxHeight: 220,
-        overflowY: 'auto',
-        fontFamily: 'monospace',
-        fontSize: 11,
-        lineHeight: '18px',
+        background: '#1a1a1a',
+        border: '1px solid #2a2a2a',
       }}
     >
-      {logs.length === 0 ? (
-        <span style={{ color: '#666' }}>No log entries yet.</span>
-      ) : (
-        logs.map((entry, i) => (
-          <div key={i} style={{ color: LOG_LEVEL_COLOR[entry.level] }}>
-            <span style={{ color: '#555', userSelect: 'none' }}>
-              {entry.time.toLocaleTimeString()}&nbsp;
-            </span>
-            {entry.message}
-          </div>
-        ))
-      )}
-      <div ref={bottomRef} />
+      <Flex
+        align="center"
+        justify="space-between"
+        style={{ fontSize: 14, height: 30 }}
+      >
+        <div style={{ padding: '0 10px' }}>
+          Language Server &mdash; {LSP_DOT[status].title}
+        </div>
+        <Button
+          type="text"
+          size="small"
+          shape="square"
+          icon={<CloseOutlined />}
+          onClick={() => onClose()}
+          style={{ borderRadius: 0, height: '100%', width: 30 }}
+        />
+      </Flex>
+
+      <div style={{ height: 1, background: '#2a2a2a' }} />
+
+      <div
+        style={{
+          padding: '5px 10px',
+          width: '100%',
+          maxHeight: 250,
+          overflowY: 'auto',
+          fontFamily: 'monospace',
+          fontSize: 11,
+          lineHeight: '18px',
+        }}
+      >
+        {logs.length === 0 ? (
+          <div style={{ color: '#666' }}>No log entries yet.</div>
+        ) : (
+          logs.map((entry, i) => (
+            <div key={i} style={{ color: LOG_LEVEL_COLOR[entry.level] }}>
+              <span style={{ color: '#555', userSelect: 'none' }}>
+                {entry.time.toLocaleTimeString()}&nbsp;
+              </span>
+              {entry.message}
+            </div>
+          ))
+        )}
+        <div ref={bottomRef} />
+      </div>
     </div>
   );
 };
@@ -57,19 +91,31 @@ const LspLogsPopover: React.FC<any> = () => {
 export const LspStatusButton: React.FC<any> = () => {
   const status = useSelector(Editor.select.lspStatus);
   const [logsOpen, setLogsOpen] = useState(false);
+
+  const handleRetry = () => {
+    if (status === 'ready' || status === 'connecting') return;
+    store.dispatch(Editor.action.retryLsp());
+  };
+
   return (
     <Popover
+      arrow={false}
       open={logsOpen}
       onOpenChange={setLogsOpen}
       trigger="click"
       placement="topLeft"
-      title={`Language Server — ${LSP_DOT[status].title}`}
-      content={<LspLogsPopover />}
+      content={
+        <LspLogsPopover status={status} onClose={() => setLogsOpen(false)} />
+      }
       styles={{
-        container: { background: '#181819' },
+        container: {
+          padding: 0,
+          borderRadius: 0,
+          boxShadow: '0 0 10px rgba(0,0,0,.25)',
+        },
       }}
     >
-      <StatusBarButton>
+      <StatusBarButton onClick={handleRetry}>
         <span
           style={{
             display: 'inline-block',

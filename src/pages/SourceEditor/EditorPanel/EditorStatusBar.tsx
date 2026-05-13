@@ -7,7 +7,6 @@ import {
   GithubOutlined,
   RotateLeftOutlined,
   RotateRightOutlined,
-  SaveOutlined,
 } from '@ant-design/icons';
 import { Flex } from 'antd';
 import { useEffect, useRef, useState } from 'react';
@@ -15,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { useCurrentEditor } from './EditorRef';
 import { LspStatusButton } from './LspStatusButton';
 import { StatusBarButton } from './StatusBarButton';
-import { handleClear, handleRedo, handleFormat, handleUndo } from './utils';
+import { handleClear, handleFormat, handleRedo, handleUndo } from './actions';
 
 export const EditorStatusBar: React.FC<any> = () => {
   const state = useCurrentEditor();
@@ -31,6 +30,7 @@ export const EditorStatusBar: React.FC<any> = () => {
   const [canEditorUndo, setCanEditorUndo] = useState(false);
   const [canEditorRedo, setCanEditorRedo] = useState(false);
 
+  // Size observer
   const observer = useRef(
     new ResizeObserver(([entry]) => {
       const available = entry.target.clientWidth;
@@ -48,41 +48,54 @@ export const EditorStatusBar: React.FC<any> = () => {
     return () => obs.disconnect();
   }, []);
 
+  // Override commands
   useEffect(() => {
     if (!state) return;
     const { editor, monaco } = state;
-
-    // Override commands
     editor.addCommand(
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
       handleFormat
     );
+  }, [state]);
 
-    // Cursor position
-    editor.onDidChangeCursorPosition((e) => {
+  // Cursor position
+  useEffect(() => {
+    if (!state) return;
+    const { editor } = state;
+    const { dispose } = editor.onDidChangeCursorPosition((e) => {
       setCursor({ line: e.position.lineNumber, col: e.position.column });
     });
+    return () => dispose();
+  }, [state]);
 
-    // Editor options
+  // Editor options
+  useEffect(() => {
+    if (!state) return;
+    const { editor, monaco } = state;
     const updateEditorOptions = () => {
       setReadOnly(editor.getOption(monaco.editor.EditorOption.readOnly));
     };
     queueMicrotask(updateEditorOptions);
-    editor.onDidChangeConfiguration(updateEditorOptions);
+    const { dispose } = editor.onDidChangeConfiguration(updateEditorOptions);
+    return () => dispose();
+  }, [state]);
 
-    // Model info
+  // Model info
+  useEffect(() => {
+    if (!state) return;
+    const { editor } = state;
     const model = editor.getModel();
-    if (model) {
-      const updateModelInfo = () => {
-        const opts = model.getOptions();
-        setTabSize(opts.tabSize);
-        setInserSpaces(opts.insertSpaces);
-        setCanEditorUndo(model.canUndo());
-        setCanEditorRedo(model.canRedo());
-      };
-      queueMicrotask(updateModelInfo);
-      model.onDidChangeContent(updateModelInfo);
-    }
+    if (!model) return;
+    const updateModelInfo = () => {
+      const opts = model.getOptions();
+      setTabSize(opts.tabSize);
+      setInserSpaces(opts.insertSpaces);
+      setCanEditorUndo(model.canUndo());
+      setCanEditorRedo(model.canRedo());
+    };
+    queueMicrotask(updateModelInfo);
+    const { dispose } = model.onDidChangeContent(updateModelInfo);
+    return () => dispose();
   }, [state]);
 
   return (
@@ -138,11 +151,11 @@ export const EditorStatusBar: React.FC<any> = () => {
       <div style={{ flex: 1, minWidth: 20 }} />
       {width > 620 && (
         <>
-          <StatusBarButton>
+          <StatusBarButton disabled>
             Ln {cursor.line}, Col {cursor.col}
           </StatusBarButton>
           <div style={{ width: 5 }} />
-          <StatusBarButton>
+          <StatusBarButton disabled>
             {insertSpaces ? 'Spaces' : 'Tab Size'}: {tabSize}
           </StatusBarButton>
           <div style={{ width: 5 }} />
@@ -150,8 +163,8 @@ export const EditorStatusBar: React.FC<any> = () => {
       )}
       {source && width > 480 && (
         <>
-          <StatusBarButton title={`Version: ${source.version}`}>
-            <CalendarOutlined />{' '}
+          <StatusBarButton disabled title={`Version: ${source.version}`}>
+            <CalendarOutlined style={{ fontSize: 14 }} />{' '}
             {formatDate(parseDate(Number(source.version) * 1000))}
           </StatusBarButton>
           <div style={{ width: 5 }} />

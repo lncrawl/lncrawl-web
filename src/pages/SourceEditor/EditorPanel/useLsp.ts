@@ -108,13 +108,17 @@ function buildURL(token: string): string {
   return `${baseUrl}/api/lsp?token=${encodeURIComponent(token)}`;
 }
 
+const MAX_RETRIES = 10;
+const MAX_DELAY = 30000;
+
 /**
  * Manages the lifecycle of a pylsp WebSocket connection tied to the Monaco
- * editor. Returns the current connection status for display in the UI.
+ * editor. Reconnects automatically with exponential backoff on failure.
  */
 export function usePythonLanguageServer(ready: boolean) {
   const isAdmin = useSelector(Auth.select.isAdmin);
   const source = useSelector(Editor.select.currentSource);
+  const retryKey = useSelector(Editor.select.lspRetryKey);
 
   const setStatus = (status: LspStatus) => {
     store.dispatch(Editor.action.setLspStatus(status));
@@ -144,110 +148,175 @@ export function usePythonLanguageServer(ready: boolean) {
     const { editor, monaco } = state;
     const docUri = `file:///workspace/sources/${source.file_path}`;
 
-    setStatus('connecting');
-    emit('info', `Connecting to LSP for ${source.file_path}`);
-    const client = new LspClient(buildURL(token));
+    let aborted = false;
+    let retryTimeout: ReturnType<typeof setTimeout> | undefined;
+    let abortResolve!: () => void;
+    const abortPromise = new Promise<void>((res) => {
+      abortResolve = res;
+    });
+
+    // Resolves when the delay elapses OR the effect is torn down.
+    const sleep = (ms: number) =>
+      Promise.race([
+        new Promise<void>((res) => {
+          retryTimeout = setTimeout(res, ms);
+        }),
+        abortPromise,
+      ]);
+
+    let activeClient: LspClient | undefined;
     let disposeProviders: (() => void) | undefined;
     let changeHandle: { dispose(): void } | undefined;
-    let aborted = false;
 
     void (async () => {
-      try {
-        await client.waitForOpen();
-        if (aborted) return;
-        emit('info', 'WebSocket open — initializing language server');
+      let failCount = 0;
+      let firstIter = true;
 
-        const initResult = await client.request<{
-          capabilities: Record<string, unknown>;
-        }>('initialize', {
-          processId: null,
-          clientInfo: {
-            name: 'lncrawl-web',
-            version: '1.0',
-          },
-          rootUri: 'file:///workspace',
-          capabilities: CAPABILITIES,
-          workspaceFolders: [
-            {
-              uri: 'file:///workspace',
-              name: 'lncrawl',
-            },
-            {
-              uri: 'file:///workspace',
-              name: 'sources',
-            },
-          ],
+      while (!aborted) {
+        if (firstIter) {
+          emit('info', `Connecting to LSP for ${source.file_path}`);
+          setStatus('connecting');
+          firstIter = false;
+        } else if (failCount > 0) {
+          const delay = Math.min(MAX_DELAY, 1000 * 2 ** (failCount - 1));
+          emit(
+            'warn',
+            `Reconnecting in ${delay / 1000}s... (attempt ${failCount} of ${MAX_RETRIES})`
+          );
+          setStatus('connecting');
+          await sleep(delay);
+          if (aborted) break;
+        } else {
+          // Unexpected drop after a successful session — reconnect immediately.
+          emit('info', 'Reconnecting to LSP...');
+          setStatus('connecting');
+        }
+
+        // Dispose providers from the previous iteration before creating a new client.
+        disposeProviders?.();
+        disposeProviders = undefined;
+        changeHandle?.dispose();
+        changeHandle = undefined;
+
+        const client = new LspClient(buildURL(token));
+        activeClient = client;
+
+        // Resolved by onClose so we can detect an unexpected drop while running.
+        let resolveClose!: () => void;
+        const closedPromise = new Promise<void>((res) => {
+          resolveClose = res;
         });
-        if (aborted) return;
-        emit('info', 'Language server initialized');
+        client.onClose = () => resolveClose();
 
-        client.notify('initialized', {});
-        client.notify('textDocument/didOpen', {
-          textDocument: {
-            uri: docUri,
-            languageId: 'python',
-            version: 0,
-            text: editor.getValue(),
-          },
-        });
-        emit('info', `Opened document: ${source.file_path}`);
+        try {
+          await client.waitForOpen();
+          if (aborted) {
+            client.close();
+            break;
+          }
+          emit('info', 'WebSocket open — initializing language server');
 
-        disposeProviders = registerLspProviders(
-          monaco,
-          editor,
-          client,
-          docUri,
-          initResult?.capabilities ?? {}
-        );
-        setStatus('ready');
-        emit('info', 'LSP ready — completions, hover and diagnostics active');
+          const initResult = await client.request<{
+            capabilities: Record<string, unknown>;
+          }>('initialize', {
+            processId: null,
+            clientInfo: { name: 'lncrawl-web', version: '1.0' },
+            rootUri: 'file:///workspace',
+            capabilities: CAPABILITIES,
+            workspaceFolders: [{ uri: 'file:///workspace', name: 'lncrawl' }],
+          });
+          if (aborted) {
+            client.close();
+            break;
+          }
+          emit('info', 'Language server initialized');
 
-        // Debounce content sync so we don't flood pylsp while the user types.
-        let docVersion = 1;
-        let debounce: ReturnType<typeof setTimeout>;
-        changeHandle = editor.onDidChangeModelContent(() => {
-          clearTimeout(debounce);
-          debounce = setTimeout(() => {
+          client.notify('initialized', {});
+          client.notify('textDocument/didOpen', {
+            textDocument: {
+              uri: docUri,
+              languageId: 'python',
+              version: 0,
+              text: editor.getValue(),
+            },
+          });
+          emit('info', `Opened document: ${source.file_path}`);
+
+          disposeProviders = registerLspProviders(
+            monaco,
+            editor,
+            client,
+            docUri,
+            initResult?.capabilities ?? {}
+          );
+          setStatus('ready');
+          emit('info', 'LSP ready — completions, hover and diagnostics active');
+          failCount = 0; // reset backoff on successful initialisation
+
+          // Debounce content sync so we don't flood pylsp while the user types.
+          let docVersion = 1;
+          let debounce: ReturnType<typeof setTimeout>;
+          changeHandle = editor.onDidChangeModelContent(() => {
+            clearTimeout(debounce);
+            debounce = setTimeout(() => {
+              client.notify('textDocument/didChange', {
+                textDocument: { uri: docUri, version: docVersion++ },
+                contentChanges: [{ text: editor.getValue() }],
+              });
+            }, 300);
+          });
+
+          // Expose a flush so the Ctrl+S handler can sync the latest content
+          // to pylsp before the debounce fires, avoiding a stale-format race.
+          lspFlushRef.current = () => {
+            clearTimeout(debounce);
             client.notify('textDocument/didChange', {
               textDocument: { uri: docUri, version: docVersion++ },
               contentChanges: [{ text: editor.getValue() }],
             });
-          }, 300);
-        });
+          };
 
-        // Expose a flush so the Ctrl+S handler can sync the latest content
-        // to pylsp before the debounce fires, avoiding a stale-format race.
-        lspFlushRef.current = () => {
-          clearTimeout(debounce);
-          client.notify('textDocument/didChange', {
-            textDocument: { uri: docUri, version: docVersion++ },
-            contentChanges: [{ text: editor.getValue() }],
-          });
-        };
-      } catch (err) {
-        if (!aborted) {
+          // Block until the WebSocket closes unexpectedly or the effect is torn down.
+          await Promise.race([closedPromise, abortPromise]);
+
+          if (!aborted) {
+            emit('warn', 'LSP connection dropped — will reconnect');
+            lspFlushRef.current = null;
+            // failCount stays 0 → next iteration retries immediately.
+          }
+        } catch (err) {
+          if (aborted) break;
+          failCount++;
           const msg = err instanceof Error ? err.message : String(err);
-          emit('error', `Connection failed: ${msg}`);
-          setStatus('error');
+          emit('error', `Lost connection: ${msg}`);
+          if (failCount > MAX_RETRIES) {
+            emit('error', `Giving up after ${MAX_RETRIES} failed attempts`);
+            setStatus('error');
+            break;
+          }
+        } finally {
+          client.close();
         }
       }
     })();
 
     return () => {
       aborted = true;
+      abortResolve();
+      clearTimeout(retryTimeout);
       lspFlushRef.current = null;
       changeHandle?.dispose();
       disposeProviders?.();
       try {
-        client.notify('textDocument/didClose', {
+        activeClient?.notify('textDocument/didClose', {
           textDocument: { uri: docUri },
         });
       } catch {
         /* ignore if already closed */
       }
-      client.close();
+      activeClient?.close();
       emit('info', 'LSP disconnected');
       setStatus('offline');
     };
-  }, [isAdmin, source, ready]);
+  }, [isAdmin, source, ready, retryKey]);
 }

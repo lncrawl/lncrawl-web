@@ -58,6 +58,7 @@ export class LspClient {
 
   onDiagnostics?: (uri: string, diags: LspDiagnostic[]) => void;
   onApplyEdit?: (params: { edit: LspWorkspaceEdit }) => Promise<void>;
+  onClose?: (ev: CloseEvent) => void;
 
   constructor(url: string) {
     this._ws = new WebSocket(url);
@@ -68,6 +69,7 @@ export class LspClient {
         /* ignore malformed frames */
       }
     };
+    this._ws.onclose = (ev) => this.onClose?.(ev);
   }
 
   waitForOpen(): Promise<void> {

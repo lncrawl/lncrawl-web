@@ -3,9 +3,9 @@ import { Auth } from '@/store/_auth';
 import { Editor } from '@/store/_editor';
 import { Editor as MonacoEditor, type OnMount } from '@monaco-editor/react';
 import { Divider, Flex, Grid } from 'antd';
-import { throttle } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { handleSave } from './actions';
 import { editorRef } from './EditorRef';
 import { EditorStatusBar } from './EditorStatusBar';
 import { usePythonLanguageServer } from './useLsp';
@@ -39,18 +39,18 @@ export const EditorPane: React.FC<any> = () => {
     }
   }, [draft, ready]);
 
+  useEffect(() => {
+    if (!ready) return;
+    const state = editorRef.current;
+    if (!state) return;
+    const { dispose } = state.editor.onDidChangeModelContent(handleSave);
+    return () => dispose();
+  }, [ready]);
+
   usePythonLanguageServer(ready);
 
   const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = { editor, monaco };
-
-    editor.onDidChangeModelContent(
-      throttle(() => {
-        const code = editor.getValue();
-        store.dispatch(Editor.action.saveDraft(code));
-      }, 200)
-    );
-
     setMounted(true);
   };
 

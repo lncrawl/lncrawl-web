@@ -4,6 +4,20 @@ import { throttle } from 'lodash-es';
 import { editorRef } from './EditorRef';
 import { lspFlushRef } from './useLsp';
 
+export const handleSave = throttle(() => {
+  const state = editorRef.current;
+  if (!state) return;
+  const code = state.editor.getValue();
+  store.dispatch(Editor.action.saveDraft(code));
+}, 100);
+
+export const handleFormat = throttle(() => {
+  const state = editorRef.current;
+  if (!state) return;
+  lspFlushRef.current?.();
+  state.editor.getAction('editor.action.formatDocument')?.run();
+}, 100);
+
 export const handleUndo = throttle(() => {
   const state = editorRef.current;
   if (!state) return;
@@ -15,7 +29,6 @@ export const handleUndo = throttle(() => {
   if (canUndo) {
     store.dispatch(Editor.action.undo(state.editor.getValue()));
   }
-  // model?.popStackElement();
 }, 100);
 
 export const handleRedo = throttle(() => {
@@ -32,12 +45,14 @@ export const handleRedo = throttle(() => {
 }, 100);
 
 export const handleClear = throttle(() => {
-  store.dispatch(Editor.action.clear());
-}, 100);
-
-export const handleFormat = throttle(() => {
   const state = editorRef.current;
-  if (!state) return;
-  lspFlushRef.current?.();
-  state.editor.getAction('editor.action.formatDocument')?.run();
+  if (state) {
+    const original = Editor.select.currentContent(store.getState());
+    state.editor.setValue(original || '');
+  }
+  handleSave.cancel();
+  handleRedo.cancel();
+  handleUndo.cancel();
+  handleFormat.cancel();
+  store.dispatch(Editor.action.clear());
 }, 100);

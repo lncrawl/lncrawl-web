@@ -26,6 +26,7 @@ interface EditorState {
   urlHistory: Record<string, DomainHistory[] | undefined>;
   lspStatus: LspStatus;
   lspLogs: LspLogEntry[];
+  lspRetryKey: number;
 }
 
 const initialState: EditorState = {
@@ -36,6 +37,7 @@ const initialState: EditorState = {
   urlHistory: {},
   lspLogs: [],
   lspStatus: 'offline',
+  lspRetryKey: 0,
 };
 
 export const EditorSlice = createSlice({
@@ -115,6 +117,14 @@ export const EditorSlice = createSlice({
     setLspStatus(state, action: PayloadAction<LspStatus>) {
       state.lspStatus = action.payload;
     },
+    retryLsp(state) {
+      state.lspRetryKey += 1;
+      state.lspStatus = 'connecting';
+      state.lspLogs = [
+        ...state.lspLogs.slice(-99),
+        { time: new Date(), level: 'info', message: 'Retrying connection...' },
+      ];
+    },
     addLspLog(state, action: PayloadAction<Omit<LspLogEntry, 'time'>>) {
       const { level, message } = action.payload;
       state.lspLogs = [
@@ -172,6 +182,10 @@ const selectLspStatus = createSelector(
   (editor) => editor.lspStatus
 );
 const selectLspLogs = createSelector(selectEditor, (editor) => editor.lspLogs);
+const selectLspRetryKey = createSelector(
+  selectEditor,
+  (editor) => editor.lspRetryKey
+);
 
 export const Editor = {
   action: EditorSlice.actions,
@@ -185,6 +199,7 @@ export const Editor = {
     canRedo: selectCanRedo,
     lspStatus: selectLspStatus,
     lspLogs: selectLspLogs,
+    lspRetryKey: selectLspRetryKey,
   },
 };
 
@@ -198,6 +213,7 @@ const blacklist: Array<keyof EditorState> = [
   'source',
   'lspLogs',
   'lspStatus',
+  'lspRetryKey',
 ];
 
 const store = idb.createStore('lncrawl', 'editor');
