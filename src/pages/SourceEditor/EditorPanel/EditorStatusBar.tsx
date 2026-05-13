@@ -103,6 +103,8 @@ export const EditorStatusBar: React.FC<any> = () => {
       align="center"
       ref={attachObserver}
       style={{
+        position: 'sticky',
+        bottom: 0,
         height: 23,
         flexShrink: 0,
         padding: '0 6px',
