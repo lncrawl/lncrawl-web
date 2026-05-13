@@ -95,3 +95,10 @@ export function parseSegments(logs: string[]): Segment[] {
   }
   return out;
 }
+
+export function extractLines(logs: string[], separator: string = '\n'): string {
+  return parseSegments(logs)
+    .filter((x) => x.kind === 'line')
+    .map((x) => x.text)
+    .join(separator);
+}

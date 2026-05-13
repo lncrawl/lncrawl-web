@@ -1,14 +1,15 @@
 import { LogViewer } from '@/pages/SourceEditor/LogViewer';
+import { Auth } from '@/store/_auth';
 import { Editor } from '@/store/_editor';
 import { TestStatus } from '@/types';
 import { PlayCircleOutlined, StopOutlined } from '@ant-design/icons';
-import { Button, Flex, Tooltip } from 'antd';
+import { Button, Divider, Flex, Tooltip } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { NovelUrlForm } from './NovelUrlForm';
+import { SubmitPRButton } from './SubmitPRButton';
 import { TestStatusMessage } from './TestStatusMessage';
 import { useTestRunner } from './useTestRunner';
-import { Auth } from '@/store/_auth';
 
 export const TesterPanel: React.FC<any> = () => {
   const isAdmin = useSelector(Auth.select.isAdmin);
@@ -49,6 +50,13 @@ export const TesterPanel: React.FC<any> = () => {
       </Flex>
 
       <LogViewer status={status} logs={logs} />
+
+      {isAdmin && (
+        <>
+          <Divider size="small" />
+          <SubmitPRButton status={status} logs={logs} />
+        </>
+      )}
     </>
   );
 };

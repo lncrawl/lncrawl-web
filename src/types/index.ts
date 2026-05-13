@@ -240,7 +240,7 @@ export interface Announcement extends _Base {
 export interface SourcePRResponse {
   url: string;
   branch: string;
-  sha: string;
+  number: number;
 }
 
 export interface Feedback extends _Base {

@@ -35,10 +35,9 @@ export const handleClear = throttle(() => {
   store.dispatch(Editor.action.clear());
 }, 100);
 
-export const handleSave = throttle(() => {
+export const handleFormat = throttle(() => {
   const state = editorRef.current;
   if (!state) return;
   lspFlushRef.current?.();
   state.editor.getAction('editor.action.formatDocument')?.run();
-  store.dispatch(Editor.action.saveDraft(state.editor.getValue()));
 }, 100);

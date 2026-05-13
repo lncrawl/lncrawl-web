@@ -61,7 +61,7 @@ export const EditorSlice = createSlice({
     saveDraft(state, action: PayloadAction<string>) {
       // draft -> history ; payload -> draft
       if (state.source && state.draft !== action.payload) {
-        if (state.draft) {
+        if (state.draft !== null && state.draft !== state.code) {
           state.codeDrafts[state.source.domain] = {
             code: state.draft,
             version: state.source.version,

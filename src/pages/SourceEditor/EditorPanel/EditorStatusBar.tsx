@@ -1,6 +1,7 @@
 import { Editor } from '@/store/_editor';
 import { formatDate, parseDate } from '@/utils/time';
 import {
+  AuditOutlined,
   CalendarOutlined,
   ClearOutlined,
   GithubOutlined,
@@ -14,7 +15,7 @@ import { useSelector } from 'react-redux';
 import { useCurrentEditor } from './EditorRef';
 import { LspStatusButton } from './LspStatusButton';
 import { StatusBarButton } from './StatusBarButton';
-import { handleClear, handleRedo, handleSave, handleUndo } from './utils';
+import { handleClear, handleRedo, handleFormat, handleUndo } from './utils';
 
 export const EditorStatusBar: React.FC<any> = () => {
   const state = useCurrentEditor();
@@ -52,7 +53,10 @@ export const EditorStatusBar: React.FC<any> = () => {
     const { editor, monaco } = state;
 
     // Override commands
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, handleSave);
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+      handleFormat
+    );
 
     // Cursor position
     editor.onDidChangeCursorPosition((e) => {
@@ -106,9 +110,9 @@ export const EditorStatusBar: React.FC<any> = () => {
         </StatusBarButton>
       ) : (
         <>
-          <StatusBarButton onClick={handleSave} disabled={!canEditorUndo}>
-            <SaveOutlined style={{ fontSize: 14 }} />
-            {width > 200 && 'Save'}
+          <StatusBarButton onClick={handleFormat}>
+            <AuditOutlined style={{ fontSize: 14 }} />
+            {width > 200 && 'Format'}
           </StatusBarButton>
           <StatusBarButton
             onClick={handleUndo}

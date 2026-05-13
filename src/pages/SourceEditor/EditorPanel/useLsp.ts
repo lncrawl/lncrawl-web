@@ -52,7 +52,7 @@ const CAPABILITIES = {
     },
     hover: {
       dynamicRegistration: false,
-      contentFormat: ['markdown'],
+      contentFormat: ['markdown', 'plaintext'],
     },
     publishDiagnostics: {
       relatedInformation: true,
@@ -161,10 +161,22 @@ export function usePythonLanguageServer(ready: boolean) {
           capabilities: Record<string, unknown>;
         }>('initialize', {
           processId: null,
-          clientInfo: { name: 'lncrawl-web', version: '1.0' },
+          clientInfo: {
+            name: 'lncrawl-web',
+            version: '1.0',
+          },
           rootUri: 'file:///workspace',
           capabilities: CAPABILITIES,
-          workspaceFolders: [{ uri: 'file:///workspace', name: 'lncrawl' }],
+          workspaceFolders: [
+            {
+              uri: 'file:///workspace',
+              name: 'lncrawl',
+            },
+            {
+              uri: 'file:///workspace',
+              name: 'sources',
+            },
+          ],
         });
         if (aborted) return;
         emit('info', 'Language server initialized');
