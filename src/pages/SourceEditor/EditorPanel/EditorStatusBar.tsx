@@ -62,10 +62,10 @@ export const EditorStatusBar: React.FC<any> = () => {
   useEffect(() => {
     if (!state) return;
     const { editor } = state;
-    const { dispose } = editor.onDidChangeCursorPosition((e) => {
+    editor.onDidChangeCursorPosition((e) => {
       setCursor({ line: e.position.lineNumber, col: e.position.column });
     });
-    return () => dispose();
+    //return () => dispose();
   }, [state]);
 
   // Editor options
@@ -76,8 +76,8 @@ export const EditorStatusBar: React.FC<any> = () => {
       setReadOnly(editor.getOption(monaco.editor.EditorOption.readOnly));
     };
     queueMicrotask(updateEditorOptions);
-    const { dispose } = editor.onDidChangeConfiguration(updateEditorOptions);
-    return () => dispose();
+    editor.onDidChangeConfiguration(updateEditorOptions);
+    //return () => dispose();
   }, [state]);
 
   // Model info
@@ -94,8 +94,8 @@ export const EditorStatusBar: React.FC<any> = () => {
       setCanEditorRedo(model.canRedo());
     };
     queueMicrotask(updateModelInfo);
-    const { dispose } = model.onDidChangeContent(updateModelInfo);
-    return () => dispose();
+    model.onDidChangeContent(updateModelInfo);
+    //return () => dispose();
   }, [state]);
 
   return (
@@ -103,6 +103,8 @@ export const EditorStatusBar: React.FC<any> = () => {
       align="center"
       ref={attachObserver}
       style={{
+        position: 'sticky',
+        bottom: 0,
         height: 23,
         flexShrink: 0,
         padding: '0 6px',

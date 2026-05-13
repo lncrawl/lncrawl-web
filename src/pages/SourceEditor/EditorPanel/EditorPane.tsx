@@ -39,18 +39,11 @@ export const EditorPane: React.FC<any> = () => {
     }
   }, [draft, ready]);
 
-  useEffect(() => {
-    if (!ready) return;
-    const state = editorRef.current;
-    if (!state) return;
-    const { dispose } = state.editor.onDidChangeModelContent(handleSave);
-    return () => dispose();
-  }, [ready]);
-
   usePythonLanguageServer(ready);
 
   const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = { editor, monaco };
+    editor.onDidChangeModelContent(handleSave);
     setMounted(true);
   };
 
