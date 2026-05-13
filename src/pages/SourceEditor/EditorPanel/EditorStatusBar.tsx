@@ -105,7 +105,7 @@ export const EditorStatusBar: React.FC<any> = () => {
         </StatusBarButton>
       ) : (
         <>
-          <StatusBarButton onClick={handleSave}>
+          <StatusBarButton onClick={handleSave} disabled={!canEditorUndo}>
             <SaveOutlined style={{ fontSize: 14 }} />
             {width > 200 && 'Save'}
           </StatusBarButton>
