@@ -111,7 +111,11 @@ export class LspClient {
       const handlers = this._pending.get(id);
       if (handlers) {
         this._pending.delete(id);
-        msg.error ? handlers[1](msg.error) : handlers[0](msg.result);
+        if (msg.error) {
+          handlers[1](msg.error);
+        } else {
+          handlers[0](msg.result);
+        }
       }
     }
     if (msg.method === 'textDocument/publishDiagnostics') {

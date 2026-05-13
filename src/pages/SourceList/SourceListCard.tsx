@@ -40,16 +40,7 @@ export const SourceListCard: React.FC<{
         />
 
         <Flex vertical flex={1} align="start">
-          <Typography.Link
-            strong
-            href={source.url}
-            target="_blank"
-            rel="nofollow noopener noreferrer"
-            style={{ margin: 0, fontSize: 16 }}
-          >
-            {source.url}
-          </Typography.Link>
-
+          <Typography.Link strong>{source.url}</Typography.Link>
           {disabled && source.disable_reason ? (
             <Typography.Text type="secondary" italic>
               {source.disable_reason}

@@ -156,7 +156,7 @@ export const EditorStatusBar: React.FC<any> = () => {
         <StatusBarButton
           href={source?.github_url}
           target="_blank"
-          rel="alternate"
+          rel="external alternate"
           style={{ color: '#6cf', flexShrink: 0 }}
         >
           <GithubOutlined style={{ fontSize: 14 }} /> View on Github

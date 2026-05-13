@@ -1,8 +1,10 @@
 import { ArtifactListCard } from '@/components/ArtifactList/ArtifactListCard';
 import { ErrorState } from '@/components/Loading/ErrorState';
 import { LoadingState } from '@/components/Loading/LoadingState';
+import { store } from '@/store';
 import { Auth } from '@/store/_auth';
 import { Config } from '@/store/_config';
+import { Editor } from '@/store/_editor';
 import {
   type Artifact,
   type Chapter,
@@ -120,6 +122,11 @@ export const JobDetailsPage: React.FC<any> = () => {
       };
     }
   }, [job, jobDetailsPollIntervalMs]);
+
+  useEffect(() => {
+    if (!novel) return;
+    store.dispatch(Editor.action.addNovelUrl(novel.url));
+  }, [novel]);
 
   if (loading) {
     return <LoadingState />;
