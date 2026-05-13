@@ -43,7 +43,8 @@ export const EditorStatusBar: React.FC<any> = () => {
   };
 
   useEffect(() => {
-    return () => observer.current.disconnect();
+    const obs = observer.current;
+    return () => obs.disconnect();
   }, []);
 
   useEffect(() => {
