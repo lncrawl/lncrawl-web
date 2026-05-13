@@ -184,7 +184,7 @@ export const MainLayoutSidebar: React.FC<{
           gap={5}
           align="center"
           justify="center"
-          style={{ fontSize: 11, padding: '4px 16px' }}
+          style={{ fontSize: 11, height: 23 }}
         >
           <PrivacyPolicy />
           <Divider vertical />

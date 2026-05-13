@@ -2,6 +2,7 @@ import { store } from '@/store';
 import { Editor } from '@/store/_editor';
 import { throttle } from 'lodash-es';
 import { editorRef } from './EditorRef';
+import { lspFlushRef } from './useLsp';
 
 export const handleUndo = throttle(() => {
   const state = editorRef.current;
@@ -32,4 +33,12 @@ export const handleRedo = throttle(() => {
 
 export const handleClear = throttle(() => {
   store.dispatch(Editor.action.clear());
+}, 100);
+
+export const handleSave = throttle(() => {
+  const state = editorRef.current;
+  if (!state) return;
+  lspFlushRef.current?.();
+  state.editor.getAction('editor.action.formatDocument')?.run();
+  store.dispatch(Editor.action.saveDraft(state.editor.getValue()));
 }, 100);

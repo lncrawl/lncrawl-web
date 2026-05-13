@@ -30,6 +30,7 @@ export const StatusBarButton: React.FC<ButtonProps> = ({
       type="text"
       {...props}
       style={{
+        gap: 4,
         height: '100%',
         flexShrink: 0,
         borderRadius: 0,

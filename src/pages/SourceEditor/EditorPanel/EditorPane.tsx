@@ -3,11 +3,11 @@ import { Auth } from '@/store/_auth';
 import { Editor } from '@/store/_editor';
 import { Editor as MonacoEditor, type OnMount } from '@monaco-editor/react';
 import { Divider, Flex, Grid } from 'antd';
-import { throttle } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { editorRef } from './EditorRef';
 import { EditorStatusBar } from './EditorStatusBar';
+import { usePythonLanguageServer } from './useLsp';
 
 export const EditorPane: React.FC<any> = () => {
   const screen = Grid.useBreakpoint();
@@ -38,16 +38,10 @@ export const EditorPane: React.FC<any> = () => {
     }
   }, [draft, ready]);
 
+  usePythonLanguageServer(ready);
+
   const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = { editor, monaco };
-
-    editor.onDidChangeModelContent(
-      throttle(() => {
-        const code = editor.getValue();
-        store.dispatch(Editor.action.saveDraft(code));
-      }, 100)
-    );
-
     setMounted(true);
   };
 

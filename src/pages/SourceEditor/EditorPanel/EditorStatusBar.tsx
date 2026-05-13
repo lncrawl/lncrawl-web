@@ -6,21 +6,23 @@ import {
   GithubOutlined,
   RotateLeftOutlined,
   RotateRightOutlined,
+  SaveOutlined,
 } from '@ant-design/icons';
-import { Flex, Grid } from 'antd';
-import { useEffect, useState } from 'react';
+import { Flex } from 'antd';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useCurrentEditor } from './EditorRef';
+import { LspStatusButton } from './LspStatusButton';
 import { StatusBarButton } from './StatusBarButton';
-import { handleClear, handleRedo, handleUndo } from './utils';
+import { handleClear, handleRedo, handleSave, handleUndo } from './utils';
 
 export const EditorStatusBar: React.FC<any> = () => {
   const state = useCurrentEditor();
-  const screen = Grid.useBreakpoint();
   const canUndo = useSelector(Editor.select.canUndo);
   const canRedo = useSelector(Editor.select.canRedo);
   const source = useSelector(Editor.select.currentSource);
 
+  const [width, setWidth] = useState(0);
   const [readOnly, setReadOnly] = useState(false);
   const [cursor, setCursor] = useState({ line: 1, col: 1 });
   const [tabSize, setTabSize] = useState(4);
@@ -28,12 +30,28 @@ export const EditorStatusBar: React.FC<any> = () => {
   const [canEditorUndo, setCanEditorUndo] = useState(false);
   const [canEditorRedo, setCanEditorRedo] = useState(false);
 
+  const observer = useRef(
+    new ResizeObserver(([entry]) => {
+      const available = entry.target.clientWidth;
+      setWidth(10 * Math.floor(available / 10));
+    })
+  );
+
+  const attachObserver = (element: HTMLDivElement | null) => {
+    if (!element) return;
+    observer.current.observe(element);
+  };
+
+  useEffect(() => {
+    return () => observer.current.disconnect();
+  }, []);
+
   useEffect(() => {
     if (!state) return;
     const { editor, monaco } = state;
 
     // Override commands
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {});
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, handleSave);
 
     // Cursor position
     editor.onDidChangeCursorPosition((e) => {
@@ -65,8 +83,9 @@ export const EditorStatusBar: React.FC<any> = () => {
   return (
     <Flex
       align="center"
+      ref={attachObserver}
       style={{
-        height: 22,
+        height: 23,
         flexShrink: 0,
         padding: '0 6px',
         fontSize: 11,
@@ -78,49 +97,62 @@ export const EditorStatusBar: React.FC<any> = () => {
         boxShadow: '0 -2px 2px rgba(0, 0, 0, 0.1)',
       }}
     >
+      <LspStatusButton />
+      <div style={{ width: 5 }} />
       {readOnly ? (
         <StatusBarButton title="Editing is disabled for now. You can still view and edit it on Github">
           ⊘ Read Only
         </StatusBarButton>
       ) : (
         <>
+          <StatusBarButton onClick={handleSave}>
+            <SaveOutlined style={{ fontSize: 14 }} />
+            {width > 200 && 'Save'}
+          </StatusBarButton>
           <StatusBarButton
             onClick={handleUndo}
             disabled={!canUndo && !canEditorUndo}
           >
-            <RotateLeftOutlined /> Undo
+            <RotateLeftOutlined style={{ fontSize: 14 }} />
+            {width > 250 && 'Undo'}
           </StatusBarButton>
           <StatusBarButton
             onClick={handleRedo}
             disabled={!canRedo && !canEditorRedo}
           >
-            <RotateRightOutlined /> Redo
+            <RotateRightOutlined style={{ fontSize: 14 }} />
+            {width > 250 && 'Redo'}
           </StatusBarButton>
           {(canUndo || canRedo) && (
-            <StatusBarButton title="Clear" onClick={handleClear}>
-              <ClearOutlined />
+            <StatusBarButton onClick={handleClear}>
+              <ClearOutlined style={{ fontSize: 14 }} />
             </StatusBarButton>
           )}
         </>
       )}
-      {screen.lg && <></>}
       <div style={{ flex: 1, minWidth: 20 }} />
-      <StatusBarButton>
-        Ln {cursor.line}, Col {cursor.col}
-      </StatusBarButton>
-      <div style={{ width: 5 }} />
-      <StatusBarButton>
-        {insertSpaces ? 'Spaces' : 'Tab Size'}: {tabSize}
-      </StatusBarButton>
-      <div style={{ width: 5 }} />
-      {source && (
-        <StatusBarButton title={`Version: ${source.version}`}>
-          <CalendarOutlined />{' '}
-          {formatDate(parseDate(Number(source.version) * 1000))}
-        </StatusBarButton>
+      {width > 620 && (
+        <>
+          <StatusBarButton>
+            Ln {cursor.line}, Col {cursor.col}
+          </StatusBarButton>
+          <div style={{ width: 5 }} />
+          <StatusBarButton>
+            {insertSpaces ? 'Spaces' : 'Tab Size'}: {tabSize}
+          </StatusBarButton>
+          <div style={{ width: 5 }} />
+        </>
       )}
-      <div style={{ width: 5 }} />
-      {source && (
+      {source && width > 480 && (
+        <>
+          <StatusBarButton title={`Version: ${source.version}`}>
+            <CalendarOutlined />{' '}
+            {formatDate(parseDate(Number(source.version) * 1000))}
+          </StatusBarButton>
+          <div style={{ width: 5 }} />
+        </>
+      )}
+      {source && width > 360 && (
         <StatusBarButton
           href={source?.github_url}
           target="_blank"

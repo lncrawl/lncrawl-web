@@ -1,4 +1,5 @@
 import type { SourceItem } from '@/types';
+import type { LspLogEntry, LspStatus } from '@/utils/lsp';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import * as idb from 'idb-keyval';
@@ -23,6 +24,8 @@ interface EditorState {
   source: SourceItem | null;
   codeDrafts: Record<string, CodeDraft | undefined>;
   urlHistory: Record<string, DomainHistory[] | undefined>;
+  lspStatus: LspStatus;
+  lspLogs: LspLogEntry[];
 }
 
 const initialState: EditorState = {
@@ -31,6 +34,8 @@ const initialState: EditorState = {
   source: null,
   codeDrafts: {},
   urlHistory: {},
+  lspLogs: [],
+  lspStatus: 'offline',
 };
 
 export const EditorSlice = createSlice({
@@ -107,6 +112,16 @@ export const EditorSlice = createSlice({
         .slice(0, MAX_URL_HISTORY_PER_DOMAIN - 1);
       state.urlHistory[domain] = [item, ...history];
     },
+    setLspStatus(state, action: PayloadAction<LspStatus>) {
+      state.lspStatus = action.payload;
+    },
+    addLspLog(state, action: PayloadAction<Omit<LspLogEntry, 'time'>>) {
+      const { level, message } = action.payload;
+      state.lspLogs = [
+        ...state.lspLogs.slice(-99),
+        { time: new Date(), level, message },
+      ];
+    },
   },
 });
 
@@ -152,6 +167,11 @@ const selectCanRedo = createSelector(
   (current, history) =>
     history !== undefined && (current || '') !== (history || '')
 );
+const selectLspStatus = createSelector(
+  selectEditor,
+  (editor) => editor.lspStatus
+);
+const selectLspLogs = createSelector(selectEditor, (editor) => editor.lspLogs);
 
 export const Editor = {
   action: EditorSlice.actions,
@@ -163,6 +183,8 @@ export const Editor = {
     previousDraft: selectPreviousDraft,
     canUndo: selectCanUndo,
     canRedo: selectCanRedo,
+    lspStatus: selectLspStatus,
+    lspLogs: selectLspLogs,
   },
 };
 
@@ -171,6 +193,11 @@ export const Editor = {
 //
 const blacklist: Array<keyof EditorState> = [
   // items to exclude from local storage
+  'code',
+  'draft',
+  'source',
+  'lspLogs',
+  'lspStatus',
 ];
 
 const store = idb.createStore('lncrawl', 'editor');
