@@ -35,6 +35,7 @@ const LspLogsPopover: React.FC<{
     <div
       style={{
         width: 340,
+        position: 'relative',
         background: '#1a1a1a',
         border: '1px solid #2a2a2a',
       }}
@@ -61,13 +62,12 @@ const LspLogsPopover: React.FC<{
 
       <div
         style={{
-          padding: '5px 10px',
-          width: '100%',
           maxHeight: 250,
           overflowY: 'auto',
           fontFamily: 'monospace',
           fontSize: 11,
           lineHeight: '18px',
+          padding: '5px 10px',
         }}
       >
         {logs.length === 0 ? (
