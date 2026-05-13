@@ -1,7 +1,7 @@
 import { UserRole, type User } from '@/types';
 import { setupAxios } from '@/utils/setupAxios';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import QueryString from 'qs';
 import {
   FLUSH,
@@ -57,8 +57,10 @@ export async function onBeforeLift() {
         headers: { Authorization: `Bearer ${token}` },
       });
       store.dispatch(Auth.action.login({ token, user }));
-    } catch {
-      store.dispatch(Auth.action.logout());
+    } catch (err) {
+      if (err instanceof AxiosError && 401 === err.response?.status) {
+        store.dispatch(Auth.action.logout());
+      }
     }
   }
 
