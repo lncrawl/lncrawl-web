@@ -35,7 +35,7 @@ export const NovelUrlHistory: React.FC<{
       trigger={['click']}
       autoAdjustOverflow
       styles={{
-        item: { width: 350, maxWidth: '90vh' },
+        item: { width: 350, maxWidth: '90dvh' },
         root: { height: 300, overflow: 'auto' },
       }}
       menu={{

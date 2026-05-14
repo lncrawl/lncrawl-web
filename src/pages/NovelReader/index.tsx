@@ -37,7 +37,7 @@ export const NovelReader: React.FC<any> = () => {
       <Flex
         align="center"
         justify="center"
-        style={{ height: 'calc(100vh - 60px)' }}
+        style={{ height: 'calc(100dvh - 60px)' }}
       >
         <Spin size="large" style={{ margin: '50px 0' }} />
       </Flex>
@@ -49,7 +49,7 @@ export const NovelReader: React.FC<any> = () => {
       <Flex
         align="center"
         justify="center"
-        style={{ height: 'calc(100vh - 60px)' }}
+        style={{ height: 'calc(100dvh - 60px)' }}
       >
         <Result
           status="404"

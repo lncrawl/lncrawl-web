@@ -64,7 +64,7 @@ export const TermsOfService: React.FC<LinkProps> = (props) => {
       >
         <div
           style={{
-            maxHeight: '70vh',
+            maxHeight: '70dvh',
             overflowY: 'auto',
             padding: '16px 0',
           }}

@@ -8,7 +8,7 @@ export const EditorLayout: React.FC<any> = () => {
   return (
     <Layout
       style={{
-        height: '100vh',
+        height: '100dvh',
         background: '#1e1e1e',
         overflow: 'hidden',
       }}

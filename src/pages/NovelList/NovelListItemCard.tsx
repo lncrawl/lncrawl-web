@@ -54,7 +54,7 @@ export const NovelListItemCard: React.FC<{ novel: Novel }> = ({ novel }) => {
           root: {
             aspectRatio: 3 / 4,
             minHeight: '100%',
-            maxHeight: '50vh',
+            maxHeight: '50dvh',
           },
         }}
       />

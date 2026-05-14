@@ -32,8 +32,8 @@ const MainLayoutDesktop: React.FC<any> = () => {
       />
       <Layout.Content
         style={{
-          minHeight: '100vh',
           padding: 20,
+          minHeight: '100dvh',
           position: 'relative',
         }}
       >
@@ -48,9 +48,9 @@ const MainLayoutMobile: React.FC<any> = () => {
     <Layout>
       <Layout.Content
         style={{
-          minHeight: '100vh',
+          minHeight: '100dvh',
           position: 'relative',
-          paddingBottom: 120,
+          paddingBottom: 100,
         }}
       >
         <MobileLayoutHeader />

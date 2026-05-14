@@ -44,7 +44,7 @@ export const MainLayoutSidebar: React.FC<{
       width={fullWidth ? '100%' : 250}
       style={{
         ...style,
-        height: fullWidth ? '100%' : '100vh',
+        height: fullWidth ? '100%' : '100dvh',
       }}
     >
       <Flex

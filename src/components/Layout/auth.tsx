@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 
 export const AuthLayout: React.FC<any> = () => {
   return (
-    <Layout style={{ padding: '10px', height: '100vh' }}>
+    <Layout style={{ padding: '10px', height: '100dvh' }}>
       <Layout.Content style={{ overflow: 'auto' }}>
         <Flex
           wrap
