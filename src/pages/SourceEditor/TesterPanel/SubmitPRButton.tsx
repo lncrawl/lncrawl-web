@@ -16,8 +16,8 @@ export const SubmitPRButton: React.FC<{
 }> = ({ logs, status }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
-  const canUndo = useSelector(Editor.select.canUndo);
-  const disabled = !canUndo || status !== TestStatus.passed;
+  const hasChanges = useSelector(Editor.select.hasChanges);
+  const disabled = !hasChanges || status !== TestStatus.passed;
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [pr, setPR] = useState<SourcePRResponse>();
@@ -108,7 +108,7 @@ export const SubmitPRButton: React.FC<{
 
       <Tooltip
         title={
-          !canUndo
+          !hasChanges
             ? 'No code changes to submit'
             : disabled
               ? 'Please ensure the tests are passing before submitting a Pull Request.'

@@ -6,7 +6,7 @@ import type { LspLogEntry, LspStatus } from '@/utils/lsp';
 import { LspClient, registerLspProviders } from '@/utils/lsp';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { editorRef } from './EditorRef';
+import { useCurrentEditor } from './EditorRef';
 
 // Callable by the Ctrl+S handler to flush the debounce and sync latest
 // content to pylsp before requesting formatting.
@@ -115,7 +115,8 @@ const MAX_DELAY = 30000;
  * Manages the lifecycle of a pylsp WebSocket connection tied to the Monaco
  * editor. Reconnects automatically with exponential backoff on failure.
  */
-export function usePythonLanguageServer(ready: boolean) {
+export const PythonLanguageServer: React.FC<any> = () => {
+  const editorRef = useCurrentEditor();
   const isAdmin = useSelector(Auth.select.isAdmin);
   const source = useSelector(Editor.select.currentSource);
   const retryKey = useSelector(Editor.select.lspRetryKey);
@@ -128,13 +129,7 @@ export function usePythonLanguageServer(ready: boolean) {
   };
 
   useEffect(() => {
-    if (!ready || !isAdmin || !source) {
-      setStatus('offline');
-      return;
-    }
-
-    const state = editorRef.current;
-    if (!state) {
+    if (!isAdmin || !source || !editorRef) {
       setStatus('offline');
       return;
     }
@@ -145,7 +140,7 @@ export function usePythonLanguageServer(ready: boolean) {
       return;
     }
 
-    const { editor, monaco } = state;
+    const { editor, monaco } = editorRef;
     const docUri = `file:///workspace/sources/${source.file_path}`;
 
     let aborted = false;
@@ -318,5 +313,7 @@ export function usePythonLanguageServer(ready: boolean) {
       emit('info', 'LSP disconnected');
       setStatus('offline');
     };
-  }, [isAdmin, source, ready, retryKey]);
-}
+  }, [isAdmin, source, retryKey, editorRef]);
+
+  return null;
+};

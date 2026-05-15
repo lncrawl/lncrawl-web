@@ -48,6 +48,11 @@ export function formatDate(value?: string | number | Date | null) {
   return dayjs(value).format('MMM D, YYYY h:mm A');
 }
 
+export function formatTime(value?: string | number | Date | null) {
+  if (!value) return '';
+  return dayjs(value).format('h:mm:ss A');
+}
+
 export function formatFromNow(value?: string | number | Date | null) {
   if (!value) return '';
   return dayjs(value).fromNow();

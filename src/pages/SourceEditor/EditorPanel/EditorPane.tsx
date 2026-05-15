@@ -1,60 +1,35 @@
-import { store } from '@/store';
 import { Auth } from '@/store/_auth';
-import { Editor } from '@/store/_editor';
-import { Editor as MonacoEditor, type OnMount } from '@monaco-editor/react';
+import { Editor as MonacoEditor } from '@monaco-editor/react';
 import { Divider, Flex, Grid } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { handleSave } from './actions';
-import { editorRef } from './EditorRef';
+import { EditorKeyBindings } from './EditorKeyBindings';
+import { setCurrentEditor } from './EditorRef';
 import { EditorStatusBar } from './EditorStatusBar';
-import { usePythonLanguageServer } from './useLsp';
+import { PythonLanguageServer } from './LanguageServer';
 
 export const EditorPane: React.FC<any> = () => {
   const screen = Grid.useBreakpoint();
   const isAdmin = useSelector(Auth.select.isAdmin);
-  const draft = useSelector(Editor.select.currentDraft);
-
-  const [ready, setReady] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!mounted) return;
-    if (isAdmin) {
-      store.dispatch(Editor.action.redo());
-    } else {
-      store.dispatch(Editor.action.undo());
-    }
-    queueMicrotask(() => setReady(true));
-  }, [isAdmin, mounted]);
-
-  useEffect(() => {
-    if (!ready) return;
-    const state = editorRef.current;
-    if (!state) return;
-    const { editor } = state;
-    const model = editor.getModel();
-    if (draft && editor.getValue() !== draft) {
-      model?.setValue(draft);
-    }
-  }, [draft, ready]);
-
-  usePythonLanguageServer(ready);
-
-  const handleMount: OnMount = (editor, monaco) => {
-    editorRef.current = { editor, monaco };
-    editor.onDidChangeModelContent(handleSave);
-    setMounted(true);
-  };
+    return () => {
+      setCurrentEditor(null);
+    };
+  }, []);
 
   return (
     <Flex vertical style={{ height: '100%' }}>
+      <EditorKeyBindings />
+      <PythonLanguageServer />
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <MonacoEditor
           height="100%"
           theme="vs-dark"
           language="python"
-          onMount={handleMount}
+          onMount={(editor, monaco) => {
+            setCurrentEditor({ editor, monaco, readOnly: !isAdmin });
+          }}
           options={{
             readOnly: !isAdmin,
             padding: { top: 10, bottom: 10 },
@@ -69,9 +44,7 @@ export const EditorPane: React.FC<any> = () => {
           }}
         />
       </div>
-
       <Divider style={{ margin: 0 }} />
-
       <EditorStatusBar />
     </Flex>
   );

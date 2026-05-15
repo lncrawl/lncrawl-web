@@ -7,6 +7,7 @@ import type { PersistConfig } from 'redux-persist';
 import type { RootState } from '.';
 
 const MAX_URL_HISTORY_PER_DOMAIN = 50;
+const MAX_CODE_HISTORY_PER_DOMAIN = 2;
 
 export interface DomainHistory {
   url: string;
@@ -14,15 +15,14 @@ export interface DomainHistory {
 }
 
 export interface CodeDraft {
-  code: string;
   version: number;
+  stack: string[];
 }
 
 interface EditorState {
   code: string | null;
-  draft: string | null;
   source: SourceItem | null;
-  codeDrafts: Record<string, CodeDraft | undefined>;
+  codeHistory: Record<string, CodeDraft | undefined>;
   urlHistory: Record<string, DomainHistory[] | undefined>;
   lspStatus: LspStatus;
   lspLogs: LspLogEntry[];
@@ -31,9 +31,8 @@ interface EditorState {
 
 const initialState: EditorState = {
   code: null,
-  draft: null,
   source: null,
-  codeDrafts: {},
+  codeHistory: {},
   urlHistory: {},
   lspLogs: [],
   lspStatus: 'offline',
@@ -50,64 +49,38 @@ export const EditorSlice = createSlice({
     ) {
       if (!action.payload) {
         state.code = null;
-        state.draft = null;
         state.source = null;
       } else {
-        if (state.source?.version !== action.payload.source.version) {
-          state.draft = action.payload.code;
-        }
         state.code = action.payload.code;
         state.source = action.payload.source;
-      }
-    },
-    saveDraft(state, action: PayloadAction<string>) {
-      // draft -> history ; payload -> draft
-      if (state.source && state.draft !== action.payload) {
-        if (state.draft !== null && state.draft !== state.code) {
-          state.codeDrafts[state.source.domain] = {
-            code: state.draft,
-            version: state.source.version,
-          };
-        } else {
-          delete state.codeDrafts[state.source.domain];
-        }
-        state.draft = action.payload;
-      }
-    },
-    undo(state, action: PayloadAction<string | undefined>) {
-      // draft -> history ; code -> draft
-      if (state.source) {
-        const latest = action.payload ?? state.draft;
-        if (latest) {
-          state.codeDrafts[state.source.domain] = {
-            code: latest,
-            version: state.source.version,
-          };
-        } else {
-          delete state.codeDrafts[state.source.domain];
-        }
-        state.draft = state.code;
-      }
-    },
-    redo(state) {
-      // history -> draft
-      if (state.source) {
-        const history = state.codeDrafts[state.source.domain];
-        if (history?.version === state.source.version) {
-          state.draft = history.code;
+        const history = state.codeHistory[state.source.domain];
+        if (history && history.version !== state.source.version) {
+          delete state.codeHistory[state.source.domain];
         }
       }
     },
-    clear(state) {
-      // code -> draft ; delete history
-      if (state.source) {
-        state.draft = state.code;
-        delete state.codeDrafts[state.source.domain];
-      }
+    pushCodeChange(state, action: PayloadAction<string>) {
+      if (!state.source) return;
+      const history = state.codeHistory[state.source.domain];
+      const stack = (history?.stack || [])
+        .filter((x) => x !== action.payload)
+        .slice(-MAX_CODE_HISTORY_PER_DOMAIN + 1);
+      state.codeHistory[state.source.domain] = {
+        version: state.source.version,
+        stack: [...stack, action.payload],
+      };
+    },
+    popLastCodeChange(state) {
+      if (!state.source) return;
+      state.codeHistory[state.source.domain]?.stack.pop();
+    },
+    clearCodeHistory(state) {
+      if (!state.source) return;
+      delete state.codeHistory[state.source.domain];
     },
     addNovelUrl(state, action: PayloadAction<string>) {
       const url = action.payload;
-      const domain = extractDomain(url);
+      const domain = new URL(url).host.replace(/^www./, '');
       const item: DomainHistory = { url, time: Date.now() };
       const history = (state.urlHistory[domain] || [])
         .filter((x) => x.url !== url)
@@ -122,61 +95,53 @@ export const EditorSlice = createSlice({
       state.lspStatus = 'connecting';
       state.lspLogs = [
         ...state.lspLogs.slice(-99),
-        { time: new Date(), level: 'info', message: 'Retrying connection...' },
+        { time: Date.now(), level: 'info', message: 'Retrying connection...' },
       ];
     },
     addLspLog(state, action: PayloadAction<Omit<LspLogEntry, 'time'>>) {
       const { level, message } = action.payload;
       state.lspLogs = [
         ...state.lspLogs.slice(-99),
-        { time: new Date(), level, message },
+        { time: Date.now(), level, message },
       ];
     },
   },
 });
 
-const extractDomain = (url: string) => new URL(url).host.replace(/^www./, '');
-
 const selectEditor = (state: RootState) => state.editor;
 
-const selectUrlHistory = (url: string) =>
-  createSelector(
-    selectEditor,
-    (editor) => editor.urlHistory[extractDomain(url)] || []
-  );
-const selectCurrentSource = createSelector(
+const selectSource = createSelector(selectEditor, (editor) => editor.source);
+const selectCode = createSelector(selectEditor, (editor) => editor.code);
+const selectDomain = createSelector(selectSource, (source) => source?.domain);
+const selectCodeHistory = createSelector(
+  selectDomain,
   selectEditor,
-  (editor) => editor.source
+  (domain, editor) => (domain && editor.codeHistory[domain]?.stack) || []
 );
-const selectCurrentContent = createSelector(
-  selectEditor,
-  (editor) => editor.code
-);
-const selectCurrentDraft = createSelector(
-  selectEditor,
-  (editor) => editor.draft
-);
-const selectCanUndo = createSelector(
-  selectCurrentContent,
-  selectCurrentDraft,
-  (original, current) => (original || '') !== (current || '')
+const selectLatestDraft = createSelector(
+  selectCode,
+  selectCodeHistory,
+  (code, history) => history[0] || code
 );
 const selectPreviousDraft = createSelector(
+  selectCodeHistory,
+  (history) => history[1]
+);
+const selectHasCodeChanges = createSelector(
+  selectCodeHistory,
+  (history) => history.length > 0
+);
+
+const selectUrlHistory = createSelector(
   selectEditor,
-  (state: EditorState) => {
-    if (!state.source) return;
-    const history = state.codeDrafts[state.source.domain];
-    if (history?.version === state.source.version) {
-      return history.code;
-    }
-  }
+  selectDomain,
+  (editor, domain) => (domain && editor.urlHistory[domain]) || []
 );
-const selectCanRedo = createSelector(
-  selectCurrentDraft,
-  selectPreviousDraft,
-  (current, history) =>
-    history !== undefined && (current || '') !== (history || '')
+const selectLastUrlHistory = createSelector(
+  selectUrlHistory,
+  (history) => history[0]
 );
+
 const selectLspStatus = createSelector(
   selectEditor,
   (editor) => editor.lspStatus
@@ -191,12 +156,13 @@ export const Editor = {
   action: EditorSlice.actions,
   select: {
     urlHistory: selectUrlHistory,
-    currentSource: selectCurrentSource,
-    currentContent: selectCurrentContent,
-    currentDraft: selectCurrentDraft,
+    lastTestUrl: selectLastUrlHistory,
+    currentSource: selectSource,
+    currentCode: selectCode,
+    currentDraft: selectLatestDraft,
     previousDraft: selectPreviousDraft,
-    canUndo: selectCanUndo,
-    canRedo: selectCanRedo,
+    codeHistory: selectCodeHistory,
+    hasChanges: selectHasCodeChanges,
     lspStatus: selectLspStatus,
     lspLogs: selectLspLogs,
     lspRetryKey: selectLspRetryKey,
@@ -209,7 +175,6 @@ export const Editor = {
 const blacklist: Array<keyof EditorState> = [
   // items to exclude from local storage
   'code',
-  'draft',
   'source',
   'lspLogs',
   'lspStatus',
@@ -220,7 +185,7 @@ const store = idb.createStore('lncrawl', 'editor');
 
 export const editorPersistConfig: PersistConfig<EditorState> = {
   key: 'editor',
-  version: 1,
+  version: 2,
   blacklist,
   storage: {
     getItem: (key) => idb.get(key, store),

@@ -3,6 +3,7 @@ import { Editor } from '@/store/_editor';
 import type { LspLogEntry, LspStatus } from '@/utils/lsp';
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Flex, Popover } from 'antd';
+import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { StatusBarButton } from './StatusBarButton';
@@ -62,12 +63,13 @@ const LspLogsPopover: React.FC<{
 
       <div
         style={{
-          maxHeight: 250,
+          maxHeight: 200,
           overflowY: 'auto',
           fontFamily: 'monospace',
           fontSize: 11,
           lineHeight: '18px',
           padding: '5px 10px',
+          wordBreak: 'break-word',
         }}
       >
         {logs.length === 0 ? (
@@ -76,8 +78,9 @@ const LspLogsPopover: React.FC<{
           logs.map((entry, i) => (
             <div key={i} style={{ color: LOG_LEVEL_COLOR[entry.level] }}>
               <span style={{ color: '#555', userSelect: 'none' }}>
-                {entry.time.toLocaleTimeString()}&nbsp;
+                {dayjs(entry.time).format('H:mm:ss')}
               </span>
+              &nbsp;
               {entry.message}
             </div>
           ))

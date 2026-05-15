@@ -37,7 +37,7 @@ export const StatusBarButton: React.FC<ButtonProps> = ({
         padding: '0 5px',
         fontSize: 'inherit',
         fontFamily: 'inherit',
-        color: props.disabled ? '#666' : 'inherit',
+        color: props.disabled ? '#888' : 'inherit',
         cursor: props.disabled ? 'default' : 'pointer',
         ...props.style,
       }}

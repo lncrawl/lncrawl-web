@@ -1,14 +1,15 @@
-import { type DomainHistory } from '@/store/_editor';
+import { Editor } from '@/store/_editor';
 import { formatFromNow } from '@/utils/time';
 import { DownOutlined, HistoryOutlined } from '@ant-design/icons';
 import { Button, Dropdown, theme, Typography, type MenuProps } from 'antd';
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 export const NovelUrlHistory: React.FC<{
-  history: DomainHistory[];
   onSelect: (url: string) => any;
-}> = ({ history, onSelect }) => {
+}> = ({ onSelect }) => {
   const { token } = theme.useToken();
+  const history = useSelector(Editor.select.urlHistory);
 
   if (!history?.length) {
     return null;

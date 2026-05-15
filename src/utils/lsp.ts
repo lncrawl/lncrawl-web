@@ -6,7 +6,7 @@ import type { editor, IPosition, IRange } from 'monaco-editor';
 export type LspStatus = 'offline' | 'connecting' | 'ready' | 'error';
 
 export interface LspLogEntry {
-  time: Date;
+  time: number;
   level: 'info' | 'warn' | 'error';
   message: string;
 }

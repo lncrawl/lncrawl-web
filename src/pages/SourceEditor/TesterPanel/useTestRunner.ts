@@ -16,7 +16,7 @@ interface FormValues {
 }
 
 export const useTestRunner = () => {
-  const state = useCurrentEditor();
+  const editorRef = useCurrentEditor();
   const abortRef = useRef(new AbortController());
   const source = useSelector(Editor.select.currentSource);
   const content = useSelector(Editor.select.currentDraft);
@@ -86,10 +86,13 @@ export const useTestRunner = () => {
   }, [source?.domain, form, content, abortTest]);
 
   useEffect(() => {
-    if (!state) return;
-    const { editor, monaco } = state;
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR, runTest);
-  }, [state, runTest]);
+    if (!editorRef) return;
+    const {
+      editor,
+      monaco: { KeyMod, KeyCode },
+    } = editorRef;
+    editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyR, runTest);
+  }, [editorRef, runTest]);
 
   return {
     form,

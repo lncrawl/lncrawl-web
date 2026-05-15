@@ -10,22 +10,14 @@ export const NovelUrlForm: React.FC<{
   source: SourceItem;
   form: TestRunnerState['form'];
 }> = ({ form, source }) => {
-  const history = useSelector(Editor.select.urlHistory(source.url));
-
+  const url = useSelector(Editor.select.lastTestUrl) || '';
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={{ url: history[0]?.url || '' }}
-    >
+    <Form form={form} layout="vertical" initialValues={{ url }}>
       <Flex gap={10} align="center" justify="space-between">
         <div>
           <Typography.Text type="success">*</Typography.Text> Novel URL
         </div>
-        <NovelUrlHistory
-          history={history}
-          onSelect={(url) => form.setFieldValue('url', url)}
-        />
+        <NovelUrlHistory onSelect={(url) => form.setFieldValue('url', url)} />
       </Flex>
 
       <Form.Item
