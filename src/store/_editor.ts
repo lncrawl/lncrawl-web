@@ -124,7 +124,7 @@ const selectUrlHistory = createSelector(
 );
 const selectLastUrlHistory = createSelector(
   selectUrlHistory,
-  (history) => history[0]
+  (history) => history[0]?.url
 );
 
 const selectLspStatus = createSelector(
