@@ -7,7 +7,6 @@ import type { PersistConfig } from 'redux-persist';
 import type { RootState } from '.';
 
 const MAX_URL_HISTORY_PER_DOMAIN = 50;
-const MAX_CODE_HISTORY_PER_DOMAIN = 2;
 
 export interface DomainHistory {
   url: string;
@@ -15,8 +14,8 @@ export interface DomainHistory {
 }
 
 export interface CodeDraft {
+  draft: string;
   version: number;
-  stack: string[];
 }
 
 interface EditorState {
@@ -61,20 +60,12 @@ export const EditorSlice = createSlice({
     },
     pushCodeChange(state, action: PayloadAction<string>) {
       if (!state.source) return;
-      const history = state.codeHistory[state.source.domain];
-      const stack = (history?.stack || [])
-        .filter((x) => x !== action.payload)
-        .slice(-MAX_CODE_HISTORY_PER_DOMAIN + 1);
       state.codeHistory[state.source.domain] = {
+        draft: action.payload,
         version: state.source.version,
-        stack: [...stack, action.payload],
       };
     },
-    popLastCodeChange(state) {
-      if (!state.source) return;
-      state.codeHistory[state.source.domain]?.stack.pop();
-    },
-    clearCodeHistory(state) {
+    popCodeChange(state) {
       if (!state.source) return;
       delete state.codeHistory[state.source.domain];
     },
@@ -113,23 +104,17 @@ const selectEditor = (state: RootState) => state.editor;
 const selectSource = createSelector(selectEditor, (editor) => editor.source);
 const selectCode = createSelector(selectEditor, (editor) => editor.code);
 const selectDomain = createSelector(selectSource, (source) => source?.domain);
-const selectCodeHistory = createSelector(
+const selectDraft = createSelector(
+  selectCode,
   selectDomain,
   selectEditor,
-  (domain, editor) => (domain && editor.codeHistory[domain]?.stack) || []
-);
-const selectLatestDraft = createSelector(
-  selectCode,
-  selectCodeHistory,
-  (code, history) => history[0] || code
-);
-const selectPreviousDraft = createSelector(
-  selectCodeHistory,
-  (history) => history[1]
+  (code, domain, editor) =>
+    (domain && editor.codeHistory[domain]?.draft) || code
 );
 const selectHasCodeChanges = createSelector(
-  selectCodeHistory,
-  (history) => history.length > 0
+  selectCode,
+  selectDraft,
+  (code, draft) => code !== draft
 );
 
 const selectUrlHistory = createSelector(
@@ -159,9 +144,7 @@ export const Editor = {
     lastTestUrl: selectLastUrlHistory,
     currentSource: selectSource,
     currentCode: selectCode,
-    currentDraft: selectLatestDraft,
-    previousDraft: selectPreviousDraft,
-    codeHistory: selectCodeHistory,
+    currentDraft: selectDraft,
     hasChanges: selectHasCodeChanges,
     lspStatus: selectLspStatus,
     lspLogs: selectLspLogs,

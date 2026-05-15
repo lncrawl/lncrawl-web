@@ -65,9 +65,9 @@ class CurrentEditor {
     if (!this.readOnly) {
       const range = model.getFullModelRange();
       const selection = this.editor.getSelection();
-      const history = Editor.select.codeHistory(state);
-      for (const text of history) {
-        model.pushEditOperations([], [{ range, text }], () =>
+      const draft = Editor.select.currentDraft(state);
+      if (draft !== code) {
+        model.pushEditOperations([], [{ range, text: draft }], () =>
           selection ? [selection] : []
         );
       }
@@ -101,7 +101,7 @@ class CurrentEditor {
     this.withLock(() => {
       const model = this.editor.getModel();
       if (!model?.canUndo()) return;
-      store.dispatch(Editor.action.popLastCodeChange());
+      store.dispatch(Editor.action.popCodeChange());
       return model.undo();
     });
   }, 100);
@@ -117,7 +117,7 @@ class CurrentEditor {
   clear = () => {
     this.cancel();
     this.withLock(() => {
-      store.dispatch(Editor.action.clearCodeHistory());
+      store.dispatch(Editor.action.popCodeChange());
       const text = Editor.select.currentDraft(store.getState());
       this.editor.setValue(text || '');
     });
