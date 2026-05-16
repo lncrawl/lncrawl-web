@@ -30,7 +30,10 @@ export const SourceEditorPage: React.FC<any> = () => {
 
   return (
     <Splitter
-      style={{ height: '100dvh', overflow: 'hidden' }}
+      style={{
+        overflow: 'hidden',
+        height: 'calc(100 * var(--visual-vh, 1dvh))',
+      }}
       onResize={([panel1, panel2]) => {
         const percent = (100 * panel1) / (panel1 + panel2);
         pansiz.setEditorSize(`${Math.round(percent)}%`);

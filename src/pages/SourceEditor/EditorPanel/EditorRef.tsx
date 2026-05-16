@@ -1,6 +1,7 @@
 import { store } from '@/store';
 import { Editor } from '@/store/_editor';
 import { loader } from '@monaco-editor/react';
+import { Mutex } from 'async-mutex';
 import { throttle } from 'lodash-es';
 import type * as Monaco from 'monaco-editor';
 import { useEffect, useState } from 'react';
@@ -17,12 +18,13 @@ loader.config({
 });
 
 class CurrentEditor {
+  private _lock = new Mutex();
   private _state: EditorState;
   private _aborter = new AbortController();
 
   constructor(value: EditorState) {
     this._state = value;
-    this.withLock(this.initText);
+    this._lock.runExclusive(this.initText);
   }
 
   dispose() {
@@ -41,14 +43,6 @@ class CurrentEditor {
   get readOnly() {
     return this._state.readOnly;
   }
-
-  private withLock = async (callback: () => any) => {
-    await navigator.locks.request(
-      'editor-action',
-      { signal: this._aborter.signal },
-      () => callback()
-    );
-  };
 
   private cancel = () => {
     this.save.cancel();
@@ -78,18 +72,18 @@ class CurrentEditor {
     if (value === this._state.readOnly) return;
     this.cancel();
     this._state.readOnly = value;
-    this.withLock(this.initText);
+    this._lock.runExclusive(this.initText);
   };
 
   format = throttle(() => {
-    this.withLock(() => {
+    this._lock.runExclusive(() => {
       lspFlushRef.current?.();
       this.editor.getAction('editor.action.formatDocument')?.run();
     });
   }, 100);
 
   save = throttle(() => {
-    this.withLock(() => {
+    this._lock.runExclusive(() => {
       const code = this.editor.getValue();
       const text = Editor.select.currentDraft(store.getState());
       if (code === text) return;
@@ -98,7 +92,7 @@ class CurrentEditor {
   }, 100);
 
   undo = throttle(() => {
-    this.withLock(() => {
+    this._lock.runExclusive(() => {
       const model = this.editor.getModel();
       if (!model?.canUndo()) return;
       store.dispatch(Editor.action.popCodeChange());
@@ -107,7 +101,7 @@ class CurrentEditor {
   }, 100);
 
   redo = throttle(() => {
-    this.withLock(() => {
+    this._lock.runExclusive(() => {
       const model = this.editor.getModel();
       if (!model?.canRedo()) return;
       return model.redo();
@@ -116,7 +110,7 @@ class CurrentEditor {
 
   clear = () => {
     this.cancel();
-    this.withLock(() => {
+    this._lock.runExclusive(() => {
       store.dispatch(Editor.action.popCodeChange());
       const text = Editor.select.currentDraft(store.getState());
       this.editor.setValue(text || '');

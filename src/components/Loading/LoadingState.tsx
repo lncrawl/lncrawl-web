@@ -12,8 +12,7 @@ export const LoadingState: React.FC<
       justify="center"
       {...flexProps}
       style={{
-        width: '100%',
-        height: '100%',
+        flex: 1,
         padding: '32px 24px',
         ...flexProps.style,
       }}

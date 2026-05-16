@@ -1,17 +1,21 @@
-import { Button, Flex, Result } from 'antd';
+import { Button, Flex, Result, type FlexProps } from 'antd';
 
-export const ErrorState: React.FC<{
-  title: string;
-  error?: string;
-  onRetry?: () => void;
-}> = ({ title, error, onRetry }) => {
+export const ErrorState: React.FC<
+  FlexProps & {
+    title: string;
+    error?: string;
+    onRetry?: () => void;
+  }
+> = ({ title, error, onRetry, ...flexProps }) => {
   return (
     <Flex
       align="center"
       justify="center"
+      {...flexProps}
       style={{
-        width: '100%',
-        height: '100%',
+        flex: 1,
+        padding: '32px 24px',
+        ...flexProps.style,
       }}
     >
       <Result

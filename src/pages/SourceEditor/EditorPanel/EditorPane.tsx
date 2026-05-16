@@ -39,7 +39,7 @@ export const EditorPane: React.FC<any> = () => {
             automaticLayout: true,
             renderWhitespace: 'all',
             minimap: { enabled: false },
-            scrollBeyondLastLine: false,
+            scrollBeyondLastLine: true,
             fontFamily: '"Fira Code", "JetBrains Mono", Consolas, monospace',
           }}
         />
