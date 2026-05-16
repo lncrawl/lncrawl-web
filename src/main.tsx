@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { registerSW } from 'virtual:pwa-register';
+import { VisualViewportProvider } from './components/VisualViewportProvider.tsx';
 import { App } from './pages/index.tsx';
 import { onBeforeLift, persistor, store } from './store/index.ts';
 import { appTheme } from './utils/theme.ts';
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
         onBeforeLift={onBeforeLift}
         loading={<></>}
       >
+        <VisualViewportProvider />
         <ConfigProvider theme={appTheme}>
           <App />
         </ConfigProvider>
