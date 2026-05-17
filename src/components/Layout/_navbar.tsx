@@ -43,7 +43,7 @@ const NavbarButton: React.FC<{
       }}
     >
       <div style={{ fontSize: 18 }}>{icon}</div>
-      <div style={{ fontSize: 11, fontWeight: 500 }}>{label}</div>
+      <div style={{ fontSize: 11, fontWeight: 500, userSelect: None }}>{label}</div>
     </Flex>
   );
 };
