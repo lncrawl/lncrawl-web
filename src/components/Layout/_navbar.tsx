@@ -26,9 +26,12 @@ const NavbarButton: React.FC<{
       onClick={onClick}
       style={{
         flex: 1,
+        padding: '8px 16px',
         cursor: 'pointer',
         userSelect: 'none',
-        padding: '8px 16px',
+        msUserSelect: 'none',
+        MozUserSelect: 'none',
+        WebkitUserSelect: 'none',
         ...(active
           ? {
               opacity: 1,
@@ -42,8 +45,8 @@ const NavbarButton: React.FC<{
             }),
       }}
     >
-      <div style={{ fontSize: 18 }}>{icon}</div>
-      <div style={{ fontSize: 11, fontWeight: 500, userSelect: None }}>{label}</div>
+      <span style={{ fontSize: 18 }}>{icon}</span>
+      <span style={{ fontSize: 11, fontWeight: 500 }}>{label}</span>
     </Flex>
   );
 };
@@ -78,6 +81,9 @@ export const MobileNavbar: React.FC<{
           zIndex: 1000,
           padding: '0 5px',
           userSelect: 'none',
+          msUserSelect: 'none',
+          MozUserSelect: 'none',
+          WebkitUserSelect: 'none',
           background: token.colorBgContainer,
           boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.06)',
           borderTop: `1px solid ${token.colorBorderSecondary}`,

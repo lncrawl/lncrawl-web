@@ -43,6 +43,7 @@ export const EditorStatusBar: React.FC<any> = () => {
         if (!element) return;
         observer.current.observe(element);
       }}
+      onClick={() => editorRef.editor.focus()}
       style={{
         position: 'sticky',
         bottom: 0,
@@ -95,7 +96,7 @@ export const EditorStatusBar: React.FC<any> = () => {
       <div style={{ flex: 1, minWidth: width > 300 ? 20 : 0 }} />
       {width > 325 && (
         <>
-          <StatusBarButton disabled>
+          <StatusBarButton onClick={editorRef.goToLine}>
             Ln {state.cursor.line}, Col {state.cursor.col}
           </StatusBarButton>
         </>

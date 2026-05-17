@@ -1,8 +1,11 @@
 import { Button, Tooltip, type ButtonProps } from 'antd';
+import { getCurrentEditor } from './EditorRef';
 
 export const StatusBarButton: React.FC<ButtonProps> = ({
   title,
   children,
+  disabled,
+  onClick,
   ...props
 }) => {
   const withWrapper = (button: React.ReactNode) => {
@@ -25,10 +28,18 @@ export const StatusBarButton: React.FC<ButtonProps> = ({
     }
   };
 
+  const handleClick = (e: any) => {
+    if (onClick && !disabled) {
+      onClick(e);
+    }
+    getCurrentEditor()?.editor.focus();
+  };
+
   return withWrapper(
     <Button
       type="text"
       {...props}
+      onClick={handleClick}
       style={{
         gap: 4,
         height: '100%',
@@ -37,8 +48,8 @@ export const StatusBarButton: React.FC<ButtonProps> = ({
         padding: '0 5px',
         fontSize: 'inherit',
         fontFamily: 'inherit',
-        color: props.disabled ? '#888' : 'inherit',
-        cursor: props.disabled ? 'default' : 'pointer',
+        color: disabled ? '#888' : 'inherit',
+        cursor: disabled ? 'default' : 'pointer',
         ...props.style,
       }}
     >

@@ -43,7 +43,7 @@ export const MobileLayoutHeader: React.FC<any> = () => {
       justify="center"
       onClick={() => navigate('/')}
       style={{
-        height: 40,
+        height: 32,
         cursor: 'pointer',
         userSelect: 'none',
         padding: '0 10px',
@@ -61,7 +61,7 @@ export const MobileLayoutHeader: React.FC<any> = () => {
         style={{
           fontSize: 16,
           fontWeight: 500,
-          fontFamily: 'monospace',
+          fontFamily: 'Pacifico, cursive',
         }}
       >
         Lightnovel Crawler

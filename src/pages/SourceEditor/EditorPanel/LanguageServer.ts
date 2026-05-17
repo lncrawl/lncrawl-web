@@ -12,16 +12,10 @@ import { useCurrentEditor } from './EditorRef';
 // content to pylsp before requesting formatting.
 export const lspFlushRef: { current: (() => void) | null } = { current: null };
 
-// Subset of LSP capabilities we actually use.
-// codeAction + codeActionLiteralSupport is required so pylsp returns CodeAction
-// objects (with an inline edit field) instead of bare Command objects.
 const CAPABILITIES = {
   textDocument: {
-    synchronization: {
-      dynamicRegistration: false,
-    },
+    synchronization: {},
     completion: {
-      dynamicRegistration: false,
       completionItem: {
         snippetSupport: true,
         commitCharactersSupport: true,
@@ -42,7 +36,6 @@ const CAPABILITIES = {
       contextSupport: true,
     },
     signatureHelp: {
-      dynamicRegistration: false,
       signatureInformation: {
         documentationFormat: ['markdown', 'plaintext'],
         parameterInformation: { labelOffsetSupport: true },
@@ -51,52 +44,26 @@ const CAPABILITIES = {
       contextSupport: true,
     },
     hover: {
-      dynamicRegistration: false,
       contentFormat: ['markdown', 'plaintext'],
     },
+    definition: {},
+    references: {},
     publishDiagnostics: {
       relatedInformation: true,
       tagSupport: { valueSet: [1, 2] }, // 1 = Unnecessary, 2 = Deprecated
-      codeDescriptionSupport: true,
-      dataSupport: true,
     },
-    formatting: {
-      dynamicRegistration: false,
-    },
+    formatting: {},
     rename: {
-      dynamicRegistration: false,
       prepareSupport: true,
       prepareSupportDefaultBehavior: 1, // 1 = Identifier
-      honorsChangeAnnotations: false,
     },
-    inlayHint: {
-      dynamicRegistration: false,
-      resolveSupport: { properties: ['tooltip', 'textEdits'] },
-    },
-    codeAction: {
-      dynamicRegistration: false,
-      codeActionLiteralSupport: {
-        codeActionKind: {
-          valueSet: [
-            'quickfix',
-            'refactor',
-            'source',
-            'source.organizeImports',
-            'source.fixAll',
-          ],
-        },
-      },
-      resolveSupport: { properties: [] as string[] },
-    },
+    inlayHint: {},
   },
   workspace: {
     applyEdit: true,
     workspaceEdit: {
       documentChanges: true,
-      resourceOperations: ['create', 'rename', 'delete'],
-      failureHandling: 'textOnlyTransactional',
       normalizesLineEndings: true,
-      changeAnnotationSupport: { groupsOnLabel: false },
     },
   },
 };
@@ -141,7 +108,7 @@ export const PythonLanguageServer: React.FC<any> = () => {
     }
 
     const { editor, monaco } = editorRef;
-    const docUri = `file:///workspace/sources/${source.file_path}`;
+    const docUri = `file:///workspace/${source.file_path}`;
 
     let aborted = false;
     let retryTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -173,10 +140,10 @@ export const PythonLanguageServer: React.FC<any> = () => {
           setStatus('connecting');
           firstIter = false;
         } else if (failCount > 0) {
-          const delay = Math.min(MAX_DELAY, 1000 * 2 ** (failCount - 1));
+          const delay = Math.min(MAX_DELAY, 1000 * 2 ** failCount);
           emit(
             'warn',
-            `Reconnecting in ${delay / 1000}s... (attempt ${failCount} of ${MAX_RETRIES})`
+            `Reconnecting in ${delay / 1000}s (attempt ${failCount} / ${MAX_RETRIES})`
           );
           setStatus('connecting');
           await sleep(delay);
@@ -242,7 +209,8 @@ export const PythonLanguageServer: React.FC<any> = () => {
             editor,
             client,
             docUri,
-            initResult?.capabilities ?? {}
+            initResult?.capabilities ?? {},
+            () => lspFlushRef.current?.()
           );
           setStatus('ready');
           emit('info', 'LSP ready — completions, hover and diagnostics active');

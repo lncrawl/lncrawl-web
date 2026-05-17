@@ -76,9 +76,9 @@ class CurrentEditor {
   };
 
   format = throttle(() => {
-    this._lock.runExclusive(() => {
+    this._lock.runExclusive(async () => {
       lspFlushRef.current?.();
-      this.editor.getAction('editor.action.formatDocument')?.run();
+      await this.editor.getAction('editor.action.formatDocument')?.run();
     });
   }, 100);
 
@@ -92,28 +92,41 @@ class CurrentEditor {
   }, 100);
 
   undo = throttle(() => {
-    this._lock.runExclusive(() => {
+    this._lock.runExclusive(async () => {
       const model = this.editor.getModel();
-      if (!model?.canUndo()) return;
-      store.dispatch(Editor.action.popCodeChange());
-      return model.undo();
+      if (model?.canUndo()) {
+        store.dispatch(Editor.action.popCodeChange());
+        await model.undo();
+      }
     });
   }, 100);
 
   redo = throttle(() => {
-    this._lock.runExclusive(() => {
+    this._lock.runExclusive(async () => {
       const model = this.editor.getModel();
-      if (!model?.canRedo()) return;
-      return model.redo();
+      if (model?.canRedo()) {
+        await model.redo();
+      }
     });
   }, 100);
 
   clear = () => {
     this.cancel();
     this._lock.runExclusive(() => {
+      const selection = this.editor.getSelection();
       store.dispatch(Editor.action.popCodeChange());
       const text = Editor.select.currentDraft(store.getState());
       this.editor.setValue(text || '');
+      if (selection) {
+        this.editor.setSelection(selection);
+      }
+    });
+  };
+
+  goToLine = () => {
+    this._lock.runExclusive(async () => {
+      this.editor.focus();
+      await this.editor.getAction('editor.action.gotoLine')?.run();
     });
   };
 }
@@ -135,6 +148,7 @@ export const setCurrentEditor = (value: EditorState | null) => {
   for (const watcher of watchers) {
     watcher();
   }
+  Object.assign(window, { $E: current });
   return current;
 };
 

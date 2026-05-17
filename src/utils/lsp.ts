@@ -1,5 +1,5 @@
 ﻿import type { Monaco } from '@monaco-editor/react';
-import type { editor, IPosition, IRange } from 'monaco-editor';
+import type { editor, IPosition, IRange, languages } from 'monaco-editor';
 
 // ─── External LSP types ───────────────────────────────────────────────────────
 
@@ -44,6 +44,11 @@ interface LspInlayHint {
   kind?: number;
   paddingLeft?: boolean;
   paddingRight?: boolean;
+}
+
+interface LspLocation {
+  uri: string;
+  range: LspRange;
 }
 
 // ─── WebSocket JSON-RPC client ────────────────────────────────────────────────
@@ -177,7 +182,8 @@ export function registerLspProviders(
   ed: editor.IStandaloneCodeEditor,
   client: LspClient,
   docUri: string,
-  serverCaps: Record<string, unknown> = {}
+  serverCaps: Record<string, unknown> = {},
+  flushSync?: () => void
 ): () => void {
   const ownsModel = (m: editor.ITextModel | null) => m === ed.getModel();
 
@@ -196,6 +202,7 @@ export function registerLspProviders(
       triggerCharacters: ['.'],
       async provideCompletionItems(m: editor.ITextModel, pos: IPosition) {
         if (!ownsModel(m)) return null;
+        flushSync?.();
         const raw = await ask<{ items?: unknown[] } | unknown[]>(
           'textDocument/completion',
           { textDocument: { uri: docUri }, position: fromMonacoPos(pos) }
@@ -216,7 +223,10 @@ export function registerLspProviders(
           suggestions: items.map((item) => ({
             label: item.label,
             kind: item.kind ?? 1,
+            insertTextRules: item.insertTextFormat === 2 ? 4 : undefined, // 2 = snippet; 4 = InsertAsSnippet
             insertText: item.textEdit?.newText ?? item.insertText ?? item.label,
+            filterText: item.filterText ?? undefined,
+            sortText: item.sortText ?? undefined,
             detail: item.detail ?? undefined,
             documentation:
               typeof item.documentation === 'string'
@@ -225,7 +235,45 @@ export function registerLspProviders(
             range: item.textEdit?.range
               ? toMonacoRange(item.textEdit.range as LspRange)
               : defaultRange,
+            additionalTextEdits: item.additionalTextEdits?.map(
+              (e: { range: LspRange; newText: string }) => ({
+                range: toMonacoRange(e.range),
+                text: e.newText,
+              })
+            ),
+            // Preserved so resolveCompletionItem can forward the original
+            // LSP item back to the server for lazy-loaded insertText/docs.
+            _lsp: item,
           })),
+        };
+      },
+
+      async resolveCompletionItem(item: languages.CompletionItem) {
+        const lsp = (item as any)._lsp;
+        if (!lsp) return item;
+        const resolved = await ask<any>('completionItem/resolve', lsp);
+        if (!resolved) return item;
+        const isSnippet = resolved.insertTextFormat === 2;
+        const resolvedText =
+          resolved.textEdit?.newText ?? resolved.insertText ?? undefined;
+        return {
+          ...item,
+          insertTextRules: isSnippet ? 4 : item.insertTextRules,
+          insertText: resolvedText ?? item.insertText,
+          detail: resolved.detail ?? item.detail,
+          documentation:
+            resolved.documentation == null
+              ? item.documentation
+              : typeof resolved.documentation === 'string'
+                ? resolved.documentation
+                : (resolved.documentation?.value ?? item.documentation),
+          additionalTextEdits:
+            resolved.additionalTextEdits?.map(
+              (e: { range: LspRange; newText: string }) => ({
+                range: toMonacoRange(e.range),
+                text: e.newText,
+              })
+            ) ?? item.additionalTextEdits,
         };
       },
     }),
@@ -389,6 +437,44 @@ export function registerLspProviders(
           }
         }
         return { edits };
+      },
+    }),
+
+    // ── Definition (Go to Definition / F12) ─────────────────────────────────
+    monaco.languages.registerDefinitionProvider('python', {
+      async provideDefinition(m: editor.ITextModel, pos: IPosition) {
+        if (!ownsModel(m)) return null;
+        const result = await ask<LspLocation | LspLocation[]>(
+          'textDocument/definition',
+          { textDocument: { uri: docUri }, position: fromMonacoPos(pos) }
+        );
+        if (!result) return null;
+        const locations = Array.isArray(result) ? result : [result];
+        return locations.map((loc) => ({
+          uri: monaco.Uri.parse(loc.uri),
+          range: toMonacoRange(loc.range),
+        }));
+      },
+    }),
+
+    // ── References (Find All References / Shift+F12) ─────────────────────────
+    monaco.languages.registerReferenceProvider('python', {
+      async provideReferences(
+        m: editor.ITextModel,
+        pos: IPosition,
+        context: { includeDeclaration: boolean }
+      ) {
+        if (!ownsModel(m)) return null;
+        const result = await ask<LspLocation[]>('textDocument/references', {
+          textDocument: { uri: docUri },
+          position: fromMonacoPos(pos),
+          context: { includeDeclaration: context.includeDeclaration },
+        });
+        if (!result) return [];
+        return result.map((loc) => ({
+          uri: monaco.Uri.parse(loc.uri),
+          range: toMonacoRange(loc.range),
+        }));
       },
     }),
   ];

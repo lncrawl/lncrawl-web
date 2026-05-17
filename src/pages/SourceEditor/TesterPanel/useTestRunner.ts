@@ -19,7 +19,6 @@ export const useTestRunner = () => {
   const editorRef = useCurrentEditor();
   const abortRef = useRef(new AbortController());
   const source = useSelector(Editor.select.currentSource);
-  const content = useSelector(Editor.select.currentDraft);
 
   const [form] = Form.useForm<FormValues>();
   const [logs, setLogs] = useState<string[]>([]);
@@ -32,9 +31,15 @@ export const useTestRunner = () => {
 
   const runTest = useCallback(async () => {
     abortTest();
-    if (!source?.domain || !content) {
+    if (!source?.domain || !editorRef) {
       return;
     }
+
+    const code = editorRef.editor.getValue();
+    const text = Editor.select.currentDraft(store.getState());
+    if (code === text) return; // no changes
+    store.dispatch(Editor.action.pushCodeChange(code));
+
     try {
       setLogs([]);
       setStatus(TestStatus.running);
@@ -55,7 +60,7 @@ export const useTestRunner = () => {
             'Content-Type': 'application/json',
             ...(authorization ? { Authorization: authorization } : {}),
           },
-          body: JSON.stringify({ url, content }),
+          body: JSON.stringify({ url, content: code }),
           signal: abortRef.current.signal,
         }
       );
@@ -83,7 +88,7 @@ export const useTestRunner = () => {
       setLogs((prev) => [...prev, `<!> ${stringifyError(err)}`]);
       setStatus(TestStatus.failed);
     }
-  }, [source?.domain, form, content, abortTest]);
+  }, [editorRef, source?.domain, form, abortTest]);
 
   useEffect(() => {
     if (!editorRef) return;
